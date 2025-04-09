@@ -1,0 +1,80 @@
+export const campaigns = [
+  {
+    id: 1,
+    title: "Save the Local Animal Shelter",
+    category: "Animals",
+    creator: "John Doe",
+    description: "Help us renovate our local animal shelter to provide better care for abandoned pets.",
+    longDescription: "Our local animal shelter has been serving the community for over 15 years, saving thousands of animals. Recently, our facilities have deteriorated, and we need funds to replace old kennels, improve ventilation, and create a better environment for animals awaiting adoption. Your support will directly impact the lives of these animals and help us continue our mission of finding them loving homes.",
+    goalAmount: 25000,
+    raisedAmount: 15750,
+    backers: 143,
+    daysLeft: 21,
+    image: "https://images.unsplash.com/photo-1548767797-d8c844163c4c?q=80&w=1171&auto=format&fit=crop"
+  },
+  {
+    id: 2,
+    title: "Revolutionary Eco-Friendly Water Bottle",
+    category: "Product",
+    creator: "Green Solutions Inc.",
+    description: "Fund the production of our biodegradable water bottle that helps reduce plastic waste.",
+    longDescription: "We've developed a revolutionary water bottle made from plant-based materials that completely biodegrades within 6 months when composted. Unlike traditional plastic bottles that take hundreds of years to break down, our solution tackles the global plastic crisis head-on. With your support, we can finalize the manufacturing process and bring this eco-friendly alternative to market at an affordable price.",
+    goalAmount: 50000,
+    raisedAmount: 34250,
+    backers: 315,
+    daysLeft: 45,
+    image: "https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=1964&auto=format&fit=crop"
+  },
+  {
+    id: 3,
+    title: "Community Garden Initiative",
+    category: "Community",
+    creator: "Sarah Johnson",
+    description: "Help transform an abandoned lot into a vibrant community garden that will provide fresh produce to local families.",
+    longDescription: "Our neighborhood has limited access to fresh, affordable produce. By converting this unused urban space into a productive garden, we'll not only beautify our community but also provide nutritious food to those who need it most. The garden will also serve as an educational space where children and adults can learn about sustainable agriculture and healthy eating. Your contribution will fund tools, soil, seeds, and irrigation systems.",
+    goalAmount: 10000,
+    raisedAmount: 6780,
+    backers: 89,
+    daysLeft: 18,
+    image: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?q=80&w=1972&auto=format&fit=crop"
+  },
+  {
+    id: 4,
+    title: "Educational Coding Program for Kids",
+    category: "Education",
+    creator: "Tech for All Foundation",
+    description: "Support our after-school program teaching coding skills to underprivileged children.",
+    longDescription: "In today's digital world, coding literacy is becoming as essential as reading and writing. Our program introduces children ages 8-14 to the fundamentals of computer science in a fun, interactive environment. With your support, we can purchase computers, develop curriculum materials, and train instructors. We aim to reach 500 children in our first year, with special focus on underrepresented groups in tech.",
+    goalAmount: 35000,
+    raisedAmount: 28900,
+    backers: 205,
+    daysLeft: 12,
+    image: "https://images.unsplash.com/photo-1611926653458-09294b3142bf?q=80&w=1770&auto=format&fit=crop"
+  },
+  {
+    id: 5,
+    title: "Independent Film: 'The Last Light'",
+    category: "Arts",
+    creator: "Maria Gonzalez",
+    description: "Help fund our indie film exploring themes of hope and resilience in challenging times.",
+    longDescription: "This feature-length documentary follows three families as they navigate recovery after a natural disaster. We've completed 60% of shooting but need additional funding to complete production and post-processing. Our team of dedicated filmmakers has already received recognition at several film festivals for our previous work. Your support will help bring this important story to audiences worldwide.",
+    goalAmount: 60000,
+    raisedAmount: 42300,
+    backers: 378,
+    daysLeft: 30,
+    image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1959&auto=format&fit=crop"
+  },
+  {
+    id: 6,
+    title: "Renewable Energy for Rural Schools",
+    category: "Environment",
+    creator: "Bright Future Initiative",
+    description: "Install solar panels in remote schools to provide reliable electricity for better education.",
+    longDescription: "Many rural schools in developing regions lack consistent access to electricity, limiting educational opportunities. Our project aims to install solar panel systems in 15 schools, benefiting over 2,000 students. Each system will power computers, lights, and other educational resources. Additionally, we'll train local technicians to maintain the systems, creating sustainable jobs. Your contribution will directly impact the educational outcomes of these communities.",
+    goalAmount: 75000,
+    raisedAmount: 51200,
+    backers: 430,
+    daysLeft: 60,
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1974&auto=format&fit=crop"
+  }
+];
