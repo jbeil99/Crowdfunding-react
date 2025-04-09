@@ -5,7 +5,6 @@ import {
   register as registerAuth,
   logout as logoutAuth,
   getCurrentUser,
-  refreshToken,
 } from '../lib/auth';
 
 export const login = createAsyncThunk(
@@ -13,11 +12,7 @@ export const login = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await loginAuth(email, password);
-      sessionStorage.setItem('accessToken', response.access);
-      sessionStorage.setItem('refreshToken', response.refresh);
-      
-      const decodedToken = JSON.parse(atob(response.access.split('.')[1]));
-      
+      const user = await getCurrentUser()
       toast({
         title: "Success",
         description: "Successfully logged in!",
@@ -28,12 +23,9 @@ export const login = createAsyncThunk(
           access: response.access,
           refresh: response.refresh
         },
-        user: {
-          id: decodedToken.user_id
-        }
+        user: user
       };
     } catch (error) {
-      console.log(error)
       toast({
         variant: "destructive",
         title: "Login failed",
@@ -73,7 +65,7 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await logoutAuth();
+      logoutAuth();
       toast({
         title: "Success",
         description: "Successfully logged out!",
@@ -85,16 +77,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-export const fetchCurrentUser = createAsyncThunk(
-  'auth/fetchCurrentUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      return await getCurrentUser();
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
 
 const initialState = {
   user: null,
@@ -163,24 +145,11 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Fetch current user cases
-      .addCase(fetchCurrentUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload;
-      })
-      .addCase(fetchCurrentUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      });
   },
 });
 
 export const { resetError } = authSlice.actions;
-export const authReducer = authSlice.reducer;
+export default authSlice.reducer;
 
 // Selector to check if user is authenticated
 export const selectIsAuthenticated = (state) => Boolean(state.auth.tokens.access);

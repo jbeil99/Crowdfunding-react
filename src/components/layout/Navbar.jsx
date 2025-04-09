@@ -13,7 +13,8 @@ const Navbar = () => {
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { user } = useSelector((state) => state.auth);
-
+  const stpre = useSelector((state) => state.auth);
+  console.log(stpre)
   const handleLogout = async () => {
     try {
       await dispatch(logout()).unwrap();
