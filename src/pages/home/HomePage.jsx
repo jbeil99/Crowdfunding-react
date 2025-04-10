@@ -1,11 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import CampaignCard from '@/components/campaign/CampaignCard';
-import { campaigns } from '@/data/campaigns';
+import CampaignSlider from './components/CampaignSlider';
+import { getFeaturedProjects, getLatestProjects, getTopProjects } from '../../lib/projects';
 
-// Categories with icons
 const categories = [
   { name: 'Technology', icon: '💻' },
   { name: 'Arts', icon: '🎨' },
@@ -16,11 +14,37 @@ const categories = [
 ];
 
 const HomePage = () => {
-  const [filter, setFilter] = useState('trending');
+  const [featuredCampaigns, setFeaturedCampaigns] = useState([]);
+  const [latestCampaigns, setLatestCampaigns] = useState([]);
+  const [topRatedCampaigns, setTopRatedCampaigns] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get featured campaigns (in a real app, these might be most funded, newest, etc.)
-  const featuredCampaigns = campaigns.slice(0, 3);
-  const otherCampaigns = campaigns.slice(3);
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      setIsLoading(true);
+      try {
+        const [featured, latest, topRated] = await Promise.all([
+          getFeaturedProjects(),
+          getLatestProjects(),
+          getTopProjects(),
+        ]);
+
+        if (featured.status !== 200 || latest.status !== 200 || topRated.status !== 200) {
+          throw new Error('Failed to fetch some campaigns');
+        }
+
+        setFeaturedCampaigns(featured.data.results);
+        setLatestCampaigns(latest.data.results);
+        setTopRatedCampaigns(topRated.data.results);
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCampaigns();
+  }, []);
 
   return (
     <div>
@@ -47,22 +71,10 @@ const HomePage = () => {
       </section>
 
       {/* Featured campaigns */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">Featured Campaigns</h2>
-            <Link to="/discover" className="text-primary hover:underline">
-              View all campaigns
-            </Link>
-          </div>
+      <CampaignSlider title="Featured Campaigns" campaigns={featuredCampaigns} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Top Rated campaigns */}
+      <CampaignSlider title="Top Rated Projects" campaigns={topRatedCampaigns} />
 
       {/* Categories section */}
       <section className="py-12 bg-gray-50">
@@ -127,23 +139,7 @@ const HomePage = () => {
       </section>
 
       {/* More campaigns */}
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-8">More Projects to Explore</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {otherCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link to="/discover">
-              <Button variant="outline">Discover More</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <CampaignSlider title="Latest Campaigns" campaigns={latestCampaigns} />
     </div>
   );
 };

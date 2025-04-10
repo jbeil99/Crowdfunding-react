@@ -1,10 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import HomePage from "./pages/HomePage";
-import DiscoverPage from "./pages/DiscoverPage";
-import CampaignDetailPage from "./pages/CampaignDetailPage";
-import CreateCampaignPage from "./pages/CreateCampaignPage";
+import HomePage from "./pages/home/HomePage";
+import DiscoverPage from "./pages/campaign/DiscoverPage";
+import CampaignDetailPage from "./pages/campaign/CampaignDetailPage";
+import CreateCampaignPage from "./pages/campaign/CreateCampaignPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import { Button } from "@/components/ui/button";
 import LoginPage from "./pages/Login";
