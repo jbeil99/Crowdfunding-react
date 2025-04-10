@@ -6,12 +6,12 @@ import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
 import Tag from './Tag';
-import Comments from './Comments';
+import Activites from './Activites';
 import SideBar from './Sidebar';
-
+import { useParams } from 'react-router-dom';
 
 const CampaignDetail = ({ campaign }) => {
-
+  const { id } = useParams()
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -47,7 +47,7 @@ const CampaignDetail = ({ campaign }) => {
               {campaign.category?.title || "No Category"}
             </span>
             <span className="text-gray-600 text-sm">
-              by <strong>{campaign.user.first_name}</strong>
+              by <strong>{campaign.owner.first_name}</strong>
             </span>
           </div>
           {/* Tags */}
@@ -66,7 +66,7 @@ const CampaignDetail = ({ campaign }) => {
           </div>
 
           {/* Comment Section */}
-          <Comments comments={campaign.comments} />
+          <Activites comments={campaign.comments} ratings={campaign.ratings} donations={campaign.donations} id={id} />
         </div>
 
         {/* Sidebar */}

@@ -4,10 +4,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 const CampaignCard = ({ campaign }) => {
-  // Default image if none provided
   const imageUrl = campaign.thumbnail || "/api/placeholder/400/225";
 
-  // Calculate percentage raised
   const raisedAmount = campaign.total_donations || 0;
   const goalAmount = campaign.total_target || 1;
   const percentRaised = Math.min(
@@ -16,8 +14,8 @@ const CampaignCard = ({ campaign }) => {
   );
 
   const calculateDaysLeft = () => {
-    if (!campaign.end_date) return "N/A";
-    const endDate = new Date(campaign.end_date);
+    if (!campaign.end_time) return "N/A";
+    const endDate = new Date(campaign.end_time);
     const today = new Date();
     const diffTime = endDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -31,7 +29,7 @@ const CampaignCard = ({ campaign }) => {
       <Link to={`/campaign/${campaign.id}`}>
         <div className="aspect-video w-full overflow-hidden">
           <img
-            src={imageUrl}
+            src={campaign.thumbnail}
             alt={campaign.title}
             className="h-full w-full object-cover transition-transform hover:scale-105"
           />
@@ -41,7 +39,7 @@ const CampaignCard = ({ campaign }) => {
           {campaign.category && (
             <div className="mb-2">
               <span className="text-xs font-medium text-primary px-2 py-1 rounded-full bg-primary/10">
-                {campaign.category}
+                {campaign.category.title || "No Category"}
               </span>
             </div>
           )}

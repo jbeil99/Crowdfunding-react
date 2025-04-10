@@ -115,7 +115,7 @@ const DiscoverPage = () => {
               onClick={() => setSelectedCategory(category)}
               size="sm"
             >
-              {category}
+              {category.title}
             </Button>
           ))}
         </div>

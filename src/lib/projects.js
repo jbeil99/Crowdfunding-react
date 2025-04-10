@@ -29,11 +29,19 @@ const getTopProjects = async () => {
     return response;
 }
 
-
+const addComment = async (comment) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.post(`${API_URL}/projects/comments/`, comment, {headers});
+    return response;
+}
 export {
     addProject,
     getProject,
     getFeaturedProjects,
     getLatestProjects,
-    getTopProjects
+    getTopProjects,
+    addComment
 }
