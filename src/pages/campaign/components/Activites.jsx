@@ -4,7 +4,7 @@ import Donations from "./Donations";
 import Ratings from "./Ratings";
 import Comments from "./Comments";
 import { addComment } from "../../../lib/projects";
-
+import { useParams } from "react-router-dom";
 
 export default function Activities({ comments, ratings, donations, id }) {
     const [selectedTab, setSelectedTab] = useState("comments"); // Default to "comments"
@@ -12,7 +12,6 @@ export default function Activities({ comments, ratings, donations, id }) {
     const [commentList, setCommentList] = useState(comments || []);
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-
     const validateComment = () => {
         if (!comment.trim()) {
             setError("Comment cannot be empty");
@@ -100,7 +99,7 @@ export default function Activities({ comments, ratings, donations, id }) {
 
             {/* Tab Content */}
             {selectedTab === "comments" && (
-                <Comments comments={commentList} />
+                <Comments projectID={id} />
             )}
 
             {selectedTab === "donations" && (

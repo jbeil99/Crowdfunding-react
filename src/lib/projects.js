@@ -37,11 +37,24 @@ const addComment = async (comment) => {
     const response = await axios.post(`${API_URL}/projects/comments/`, comment, {headers});
     return response;
 }
+
+const getComments = async (projectID) => {
+    const response = await axios.get(`${API_URL}/projects/${projectID}/comments`);
+    return response;
+}
+
+const getRatings = async (projectID) => {
+    const response = await axios.get(`${API_URL}/projects/${projectID}/ratings/`);
+    return response;
+}
+
 export {
     addProject,
     getProject,
     getFeaturedProjects,
     getLatestProjects,
     getTopProjects,
-    addComment
+    addComment,
+    getComments,
+    getRatings
 }
