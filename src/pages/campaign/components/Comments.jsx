@@ -1,17 +1,39 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { addComment } from "../../../lib/projects";
 
 export default function Comments({ projectID }) {
-    const [comments, setComments] = useState([]);
+    const [commentList, setCommentList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [nextPageUrl, setNextPageUrl] = useState(null);
+    const [comment, setComment] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const initialUrl = `http://127.0.0.1:8000/api/projects/${projectID}/comments`;
 
+    const validateComment = () => {
+        if (!comment.trim()) {
+            setError("Comment cannot be empty");
+            return false;
+        }
+        if (comment.length < 3) {
+            setError("Comment must be at least 3 characters");
+            return false;
+        }
+        setError("");
+        return true;
+    };
     const fetchComments = async (url) => {
         try {
             const response = await axios.get(url);
             const data = response.data;
-            setComments((prev) => [...prev, ...data.results]);
+            setCommentList((prev) => {
+                if (commentList.length > 0) {
+                    return [...prev, ...data.results]
+                } else {
+                    return [...data.results]
+                }
+            });
             setNextPageUrl(data.next);
         } catch (err) {
             console.error("Failed to fetch comments:", err);
@@ -22,7 +44,6 @@ export default function Comments({ projectID }) {
     };
 
     useEffect(() => {
-        const initialUrl = `http://127.0.0.1:8000/api/projects/${projectID}/comments`;
         fetchComments(initialUrl);
     }, [projectID]);
 
@@ -33,16 +54,58 @@ export default function Comments({ projectID }) {
         }
     };
 
-    if (loading && comments.length === 0)
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateComment()) return;
+
+        setIsSubmitting(true);
+
+        try {
+            const commentPayload = {
+                body: comment,
+            }
+            const response = await addComment(commentPayload, projectID);
+            setCommentList([response.data, ...commentList])
+            setComment("");
+        } catch (error) {
+            setError("Failed to post comment. Please try again.");
+            console.error("Error submitting comment:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (loading && commentList.length === 0)
         return <div className="text-center py-8 text-gray-500">Loading comments...</div>;
 
-    if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
     return (
         <div>
-            {comments.length > 0 ? (
+            <form onSubmit={handleCommentSubmit} className="mb-8">
+                <h3 className="text-lg font-semibold mb-2">Leave a Comment</h3>
+                <textarea
+                    className="w-full border rounded-md p-2 mb-2"
+                    placeholder="Share your thoughts..."
+                    value={comment}
+                    onChange={(e) => {
+                        setComment(e.target.value);
+                        if (error) validateComment();
+                    }}
+                    rows={3}
+                />
+                {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+                >
+                    {isSubmitting ? "Posting..." : "Post Comment"}
+                </button>
+            </form>
+            {commentList.length > 0 ? (
                 <ul className="space-y-4">
-                    {comments.map((item) => (
+                    {commentList.map((item) => (
                         <li key={item.id} className="border rounded-lg p-4 bg-gray-50">
                             <div className="flex items-start space-x-4">
                                 <img

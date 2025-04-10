@@ -29,12 +29,12 @@ const getTopProjects = async () => {
     return response;
 }
 
-const addComment = async (comment) => {
+const addComment = async (comment, projectID) => {
     const token = sessionStorage.getItem('accessToken');
     const headers = {
         'Authorization': `Bearer ${token}`,
     };
-    const response = await axios.post(`${API_URL}/projects/comments/`, comment, {headers});
+    const response = await axios.post(`${API_URL}/projects/${projectID}/comments`, comment, {headers});
     return response;
 }
 

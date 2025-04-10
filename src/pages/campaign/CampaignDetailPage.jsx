@@ -30,6 +30,7 @@ const CampaignDetailPage = () => {
 
 
 
+
   useEffect(() => {
     fetchCampaign();
   }, []);
