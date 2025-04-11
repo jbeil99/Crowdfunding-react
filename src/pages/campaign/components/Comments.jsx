@@ -69,7 +69,11 @@ export default function Comments({ projectID }) {
             setCommentList([response.data, ...commentList])
             setComment("");
         } catch (error) {
-            setError("Failed to post comment. Please try again.");
+            if (error.status === 401) {
+                setError("Please login in first to comment");
+            } else {
+                setError("Failed to post comment. Please try again.");
+            }
             console.error("Error submitting comment:", error);
         } finally {
             setIsSubmitting(false);
@@ -114,7 +118,9 @@ export default function Comments({ projectID }) {
                                     className="w-10 h-10 rounded-full object-cover"
                                 />
                                 <div>
-                                    <p className="text-gray-800 text-sm break-words">{item.body}</p>
+                                    <p className="text-gray-800 text-sm break-words break-all whitespace-pre-wrap">
+                                        {item.body}
+                                    </p>
                                     <div className="mt-2 text-xs text-gray-500">
                                         By {item.user.first_name} {item.user.last_name} •{" "}
                                         {new Date(item.created_at).toLocaleString()}

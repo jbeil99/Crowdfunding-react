@@ -28,6 +28,13 @@ const CampaignDetail = ({ campaign }) => {
               scrollbar={{ draggable: true }}
               loop
             >
+              <SwiperSlide>
+                <img
+                  src={campaign.thumbnail}
+                  alt={`${campaign.title} image`}
+                  className="w-full rounded-lg aspect-video object-cover"
+                />
+              </SwiperSlide>
               {campaign.images.map((image, index) => (
                 <SwiperSlide key={index}>
                   <img
@@ -70,7 +77,7 @@ const CampaignDetail = ({ campaign }) => {
         </div>
 
         {/* Sidebar */}
-        <SideBar campaign={campaign} />
+        <SideBar campaign={campaign} id={id} />
       </div>
     </div>
   );

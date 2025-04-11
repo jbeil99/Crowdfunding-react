@@ -24,7 +24,9 @@ export default function Ratings({ ratings }) {
                                             />
                                         ))}
                                     </div>
-                                    <p className="mt-2 text-gray-800 text-sm">{item.comment}</p> {/* Show rating details */}
+                                    <p className="text-gray-800 text-sm break-words break-all whitespace-pre-wrap">
+                                        {item.detail}
+                                    </p>
                                     <div className="mt-2 text-xs text-gray-500">
                                         By {item.user?.first_name ? `${item.user.first_name} ${item.user.last_name}` : 'Anonymous'} • {new Date(item.created_at).toLocaleDateString()}
                                     </div>

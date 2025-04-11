@@ -34,7 +34,16 @@ const addComment = async (comment, projectID) => {
     const headers = {
         'Authorization': `Bearer ${token}`,
     };
-    const response = await axios.post(`${API_URL}/projects/${projectID}/comments`, comment, {headers});
+    const response = await axios.post(`${API_URL}/projects/${projectID}/comments`, comment, { headers });
+    return response;
+}
+
+const addDonation = async (donation, projectID) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.post(`${API_URL}/projects/${projectID}/donations`, donation, { headers });
     return response;
 }
 
@@ -48,6 +57,15 @@ const getRatings = async (projectID) => {
     return response;
 }
 
+const addRatings= async (rating, projectID) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.post(`${API_URL}/projects/${projectID}/ratings`, rating, { headers });
+    return response;
+}
+
 export {
     addProject,
     getProject,
@@ -56,5 +74,7 @@ export {
     getTopProjects,
     addComment,
     getComments,
-    getRatings
+    getRatings,
+    addDonation,
+    addRatings
 }
