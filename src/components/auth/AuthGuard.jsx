@@ -15,3 +15,17 @@ export const RedirectIfAuthenticated = ({ children }) => {
 
   return !isAuthenticated ? children : null;
 };
+
+
+export const RedirectIfNotAuthenticated = ({ children }) => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
+
+  return isAuthenticated ? children : null;
+};

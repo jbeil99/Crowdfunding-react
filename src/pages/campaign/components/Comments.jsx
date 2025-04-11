@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { addComment } from "../../../lib/projects";
-import { Button } from "@/components/ui/button";
 import CommentReportForm from "./CommentReportForm";
 
 export default function Comments({ projectID }) {
@@ -11,7 +10,7 @@ export default function Comments({ projectID }) {
     const [nextPageUrl, setNextPageUrl] = useState(null);
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const initialUrl = `http://127.0.0.1:8000/api/projects/${projectID}/comments`;
+    const initialUrl = `http://127.0.0.1:8000/api/projects/${projectID}/comments?page_size=4`;
 
     const validateComment = () => {
         if (!comment.trim()) {

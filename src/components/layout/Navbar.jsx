@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/store/auth"; // Updated import path to use Redux action
-import { selectIsAuthenticated } from "@/store/auth";
+import { selectIsAuthenticated, getUser } from "@/store/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const location = useLocation();
@@ -13,6 +14,11 @@ const Navbar = () => {
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(getUser())
+
+  }, [dispatch])
 
   const handleLogout = async () => {
     try {
@@ -27,21 +33,22 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  // Authentication buttons based on user state
-  const AuthButtons = () =>
+  const AuthButtons = ({ handleLogout, user, isAuthenticated }) =>
     isAuthenticated ? (
-      <>
-        <Link to="/dashboard">
-          <Button variant="ghost" size="sm">
-            Dashboard
-          </Button>
+      <div className="flex items-center gap-3">
+        <Link to="/profile" className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user?.profile_picture} alt={user?.username} />
+            <AvatarFallback>{user?.username[0]?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium">{user?.username}</span>
         </Link>
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           Log Out
         </Button>
-      </>
+      </div>
     ) : (
-      <>
+      <div className="flex items-center gap-2">
         <Link to="/login">
           <Button variant="ghost" size="sm">
             Log In
@@ -52,7 +59,7 @@ const Navbar = () => {
             Sign Up
           </Button>
         </Link>
-      </>
+      </div>
     );
 
   return (
@@ -89,7 +96,7 @@ const Navbar = () => {
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-3">
-            <AuthButtons />
+            <AuthButtons isAuthenticated={isAuthenticated} user={user} handleLogout={handleLogout} />
             {user && (
               <Link to="/start-campaign">
                 <Button size="sm">Start a Campaign</Button>

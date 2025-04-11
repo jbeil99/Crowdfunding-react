@@ -51,12 +51,12 @@ const addDonation = async (donation, projectID) => {
 }
 
 const getComments = async (projectID) => {
-    const response = await axios.get(`${API_URL}/projects/${projectID}/comments`);
+    const response = await axios.get(`${API_URL}/projects/${projectID}/comments?page_size=4`);
     return response;
 }
 
 const getRatings = async (projectID) => {
-    const response = await axios.get(`${API_URL}/projects/${projectID}/ratings/`);
+    const response = await axios.get(`${API_URL}/projects/${projectID}/ratings?page_size=4`);
     return response;
 }
 
@@ -90,7 +90,16 @@ const cancelProject = async (projectID) => {
     const headers = {
         'Authorization': `Bearer ${token}`,
     };
-    const response = await axios.patch(`${API_URL}/projects/${projectID}/cancel`);
+    const response = await axios.patch(`${API_URL}/projects/${projectID}/cancel`, {headers});
+    return response;
+}
+
+const getUserDonations = async (userID) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.patch(`${API_URL}/users/${userID}/donations`, {headers});
     return response;
 }
 export {
@@ -107,5 +116,6 @@ export {
     addProjectReports,
     addCommentReports,
     getSimilarProjects,
-    cancelProject
+    cancelProject,
+    getUserDonations
 }

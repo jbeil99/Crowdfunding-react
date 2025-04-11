@@ -8,8 +8,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { getUser } from "../../store/auth";
+import Donations from "./components/Donations";
+import Campaign from "./components/Campaign";
+
+
 
 export default function ProfilePage() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(getUser());
+  }, [dispatch]);
+
+  const getMemberSince = (createdAt) => {
+    const date = new Date(createdAt);
+
+    const options = { year: 'numeric', month: 'long' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   return (
     <div className="container py-12">
       <div className="flex flex-col md:flex-row gap-8">
@@ -19,14 +40,14 @@ export default function ProfilePage() {
             <CardHeader className="flex flex-col items-center space-y-4">
               <Avatar className="h-20 w-20">
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
+                  src={user?.profile_picture}
                   alt="Profile"
                 />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <CardTitle>John Doe</CardTitle>
-                <CardDescription>john.doe@example.com</CardDescription>
+                <CardTitle>{user?.first_name} {user?.last_name}</CardTitle>
+                <CardDescription>{user?.email}</CardDescription>
               </div>
               <Button className="w-full bg-black hover:bg-gray-800" asChild>
                 <Link to="/edit-profile">Edit Profile</Link>
@@ -38,13 +59,13 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-medium text-gray-500">
                     Member since
                   </h3>
-                  <p className="text-gray-800">April 2025</p>
+                  <p className="text-gray-800">{getMemberSince(user?.created_at)}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Location
                   </h3>
-                  <p className="text-gray-800">New York, USA</p>
+                  <p className="text-gray-800">{user?.country ? user?.country : "Not Provided"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
@@ -60,79 +81,10 @@ export default function ProfilePage() {
         {/* Profile Content */}
         <div className="md:w-2/3 space-y-8">
           {/* My Campaigns */}
-          <Card>
-            <CardHeader>
-              <CardTitle>My Campaigns</CardTitle>
-              <CardDescription>
-                Campaigns you've created and are managing
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center border-b border-gray-200 py-4">
-                <div>
-                  <h3 className="font-medium">Community Garden Initiative</h3>
-                  <p className="text-sm text-gray-600">Started 3 weeks ago</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">$12,500 / $20,000</p>
-                  <p className="text-sm text-green-600">Active</p>
-                </div>
-              </div>
-              <div className="flex justify-between items-center border-b border-gray-200 py-4">
-                <div>
-                  <h3 className="font-medium">Local Art Exhibition</h3>
-                  <p className="text-sm text-gray-600">Started 2 months ago</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">$5,680 / $6,000</p>
-                  <p className="text-sm text-green-600">Active</p>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Link to="/start-campaign">
-                  <Button variant="outline" className="w-full">
-                    Start a New Campaign
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <Campaign user={user} />
 
           {/* Supported Campaigns */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Supported Campaigns</CardTitle>
-              <CardDescription>Campaigns you've contributed to</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center border-b border-gray-200 py-4">
-                <div>
-                  <h3 className="font-medium">Save the Local Animal Shelter</h3>
-                  <p className="text-sm text-gray-600">
-                    Contributed $50 - 1 month ago
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">$8,350 / $10,000</p>
-                  <p className="text-sm text-green-600">Active</p>
-                </div>
-              </div>
-              <div className="flex justify-between items-center py-4">
-                <div>
-                  <h3 className="font-medium">
-                    Revolutionary Eco-Friendly Water Bottle
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Contributed $25 - 3 months ago
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">$15,230 / $12,000</p>
-                  <p className="text-sm text-green-600">Funded</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Donations user={user} />
 
           {/* Account Settings */}
           <Card>
