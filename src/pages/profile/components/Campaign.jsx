@@ -90,7 +90,7 @@ export default function Campaign({ user }) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {campaignList.map((camp, index) => {
+                {campaignList.length === 0 && !loading ? "You have no Campiagn" : campaignList.map((camp, index) => {
                     return <div className="flex justify-between items-center border-b border-gray-200 py-4" key={index + 1}>
                         <div>
                             <Link to={`/campaign/${camp.id}`}><h3 className="font-medium">{camp.title}</h3></Link>

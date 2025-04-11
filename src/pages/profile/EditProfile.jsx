@@ -6,25 +6,43 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getUser } from "../../store/auth";
+import { updateProfile } from "../../lib/profile";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
 
 const profileSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters").optional().or(z.literal("")),
+  first_name: z.string().min(1, "First name is required").optional().or(z.literal("")),
+  last_name: z.string().min(1, "Last name is required").optional().or(z.literal("")),
   mobile_phone: z
     .string()
-    .regex(/^01[0125][0-9]{8}$/, "Enter a valid Egyptian mobile number"),
-  profile_picture: z.any().optional(), // will handle as File
-  birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date (YYYY-MM-DD)").optional(),
-  facebook_profile: z.string().url("Enter a valid Facebook profile URL").optional(),
-  country: z.string().optional(),
+    .regex(/^01[0125][0-9]{8}$/, "Enter a valid Egyptian mobile number")
+    .optional()
+    .or(z.literal("")),
+  profile_picture: z.any().optional(),
+  birthdate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date (YYYY-MM-DD)")
+    .optional()
+    .or(z.literal("")),
+  facebook_profile: z
+    .string()
+    .url("Enter a valid Facebook profile URL")
+    .optional()
+    .or(z.literal("")),
+  country: z.string().optional().or(z.literal("")),
 });
 
-const EditProfileForm = ({ onSubmit }) => {
+
+const EditProfileForm = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const { user } = useSelector((state) => state.auth);
+
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     dispatch(getUser());
@@ -40,7 +58,6 @@ const EditProfileForm = ({ onSubmit }) => {
   });
 
   useEffect(() => {
-    // Set form data only after user data is available
     if (user) {
       setValue("username", user.username || "");
       setValue("first_name", user.first_name || "");
@@ -52,9 +69,31 @@ const EditProfileForm = ({ onSubmit }) => {
     }
   }, [user, setValue]);
 
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await updateProfile(data);
+      if (response.status === 200) {
+        toast.success("Profile data were updated successfully");
+        navigate("/profile")
+      }
+    } catch (error) {
+      if (error.status === 401) {
+        toast.error("Please login in first to update");
+      } else {
+        for (const k of Object.keys(error.response.data)) {
+          toast.error('Failed: ' + error.response.data[k].join("\n"));
+        }
+      }
+      console.error("Error submitting comment:", error);
+    }
+  }
   const submitHandler = (data) => {
     const formData = new FormData();
     for (const key in data) {
+      if (key === "profile_picture" && data[key].length == 0) {
+        continue
+      }
       if (data[key]) {
         formData.append(key, data[key]);
       }
@@ -62,19 +101,25 @@ const EditProfileForm = ({ onSubmit }) => {
     onSubmit(formData);
   };
 
+
+
   if (!user) {
-    return <div>Loading...</div>; // Optional: Show loading state until user data is available
+    return <div>Loading...</div>;
   }
 
   return (
     <form
       onSubmit={handleSubmit(submitHandler)}
       className="space-y-4 max-w-md mx-auto"
+      encType="multipart/form-data"
     >
-      {/* Avatar */}
+      {/* Avatar and Profile Picture Upload */}
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16">
-          <AvatarImage src={user?.profile_picture} alt={user?.username} />
+          <AvatarImage
+            src={previewImage || user?.profile_picture}
+            alt={user?.username}
+          />
           <AvatarFallback>{user?.username?.[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
         <div>
@@ -82,28 +127,32 @@ const EditProfileForm = ({ onSubmit }) => {
           <Input
             id="profile_picture"
             type="file"
-            {...register("profile_picture")}
-            onChange={(e) => setValue("profile_picture", e.target.files?.[0])}
+            className="hidden"
             accept="image/*"
+            {...register("profile_picture")}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              console.log(e.target.files[0])
+              if (file) {
+                setValue("profile_picture", file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setPreviewImage(reader.result);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
           />
         </div>
       </div>
 
-      {/* Read-only fields */}
+      {/* Read-only field */}
       <div>
         <Label>Email</Label>
         <Input value={user?.email} disabled />
       </div>
-      <div>
-        <Label>User ID</Label>
-        <Input value={user?.id} disabled />
-      </div>
-      <div>
-        <Label>Status</Label>
-        <Input value={user?.is_active ? "Active" : "Inactive"} disabled />
-      </div>
 
-      {/* Editable fields */}
+      {/* Editable Fields */}
       <div>
         <Label htmlFor="username">Username</Label>
         <Input id="username" {...register("username")} />
@@ -152,7 +201,9 @@ const EditProfileForm = ({ onSubmit }) => {
           {...register("facebook_profile")}
         />
         {errors.facebook_profile && (
-          <p className="text-red-500 text-sm">{errors.facebook_profile.message}</p>
+          <p className="text-red-500 text-sm">
+            {errors.facebook_profile.message}
+          </p>
         )}
       </div>
 

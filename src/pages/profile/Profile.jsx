@@ -9,16 +9,22 @@ import {
 } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
-import { getUser } from "../../store/auth";
+import { useEffect, useState } from "react";
+import { getUser, logout } from "../../store/auth";
 import Donations from "./components/Donations";
 import Campaign from "./components/Campaign";
-
-
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { deleteUser } from "../../lib/profile";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getUser());
@@ -26,9 +32,39 @@ export default function ProfilePage() {
 
   const getMemberSince = (createdAt) => {
     const date = new Date(createdAt);
+    const options = { year: "numeric", month: "long" };
+    return date.toLocaleDateString("en-US", options);
+  };
 
-    const options = { year: 'numeric', month: 'long' };
-    return date.toLocaleDateString('en-US', options);
+  const handleDeleteAccount = async () => {
+    if (!currentPassword) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await deleteUser(currentPassword)
+
+      if (response.status !== 200) {
+        throw new Error('Failed to process request');
+      }
+      toast.success(`Your Acoount has beean deleted!`);
+      setDeleteDialogOpen(false);
+      setCurrentPassword("")
+      dispatch(logout()).unwrap();
+      navigate("/");
+    } catch (error) {
+      console.log(error)
+      if (error.status === 401) {
+        toast.error("Please login in first to Delete your account");
+
+      } else {
+        for (const k of Object.keys(error.response.data)) {
+          toast.error('Failed to process report: ' + error.response.data[k].join("\n"));
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,10 +75,7 @@ export default function ProfilePage() {
           <Card>
             <CardHeader className="flex flex-col items-center space-y-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage
-                  src={user?.profile_picture}
-                  alt="Profile"
-                />
+                <AvatarImage src={user?.profile_picture} alt="Profile" />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div className="text-center">
@@ -95,32 +128,6 @@ export default function ProfilePage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-medium">Email Notifications</h3>
-                  <p className="text-sm text-gray-600">
-                    Receive updates about your campaigns
-                  </p>
-                </div>
-                <div>
-                  <Button variant="outline" size="sm">
-                    Enabled
-                  </Button>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium">Two-Factor Authentication</h3>
-                  <p className="text-sm text-gray-600">
-                    Add an extra layer of security
-                  </p>
-                </div>
-                <div>
-                  <Button variant="outline" size="sm">
-                    Enable
-                  </Button>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>
                   <h3 className="font-medium">Change Password</h3>
                   <p className="text-sm text-gray-600">Update your password</p>
                 </div>
@@ -130,10 +137,60 @@ export default function ProfilePage() {
                   </Button>
                 </div>
               </div>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-medium">Delete your account</h3>
+                  <p className="text-sm text-gray-600">
+                    You can't get it back. Are you sure?
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialogOpen(true)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogTitle>Confirm Account Deletion</DialogTitle>
+          <DialogDescription>
+            Please enter your current password to confirm account deletion.
+          </DialogDescription>
+          <div className="space-y-4">
+            <Input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Current Password"
+              required
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+            >
+              Confirm Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
