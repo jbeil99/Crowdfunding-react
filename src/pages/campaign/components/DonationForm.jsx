@@ -32,7 +32,9 @@ export default function DonationForm({ id }) {
                 toast.error("Please login in first to donation");
 
             } else {
-                toast.error('Failed to process donation: ' + error.message);
+                for (const k of Object.keys(error.response.data)) {
+                    toast.error('Failed to process report: ' + error.response.data[k].join("\n"));
+                }
             }
         } finally {
             setIsLoading(false);

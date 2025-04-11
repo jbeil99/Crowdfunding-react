@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import CampaignDetail from './components/CampaignDetail';
 import { getProject, getSimilarProjects } from '../../lib/projects';
 import CampaignSlider from '../home/components/CampaignSlider';
+import { useSelector, useDispatch } from "react-redux";
+import { getUser } from '../../store/auth';
+
 
 const CampaignDetailPage = () => {
   const { id } = useParams();
@@ -11,7 +14,8 @@ const CampaignDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [similarProjects, setSimilarProjects] = useState([]);
-
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch()
 
   const fetchCampaign = async () => {
     setIsLoading(true);
@@ -22,7 +26,7 @@ const CampaignDetailPage = () => {
       }
       const responseProjects = await getSimilarProjects(response.data.tags);
       setCampaign(response.data);
-      setSimilarProjects(responseProjects.data.results)
+      setSimilarProjects(responseProjects.data.results.filter(x => x.id != id))
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       setError(error.message);
@@ -31,15 +35,11 @@ const CampaignDetailPage = () => {
     }
   };
 
-
-
-
-
   useEffect(() => {
     fetchCampaign();
-
+    dispatch(getUser())
   }, []);
-  // Handle case where campaign is not found
+
   if (!campaign) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">

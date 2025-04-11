@@ -85,6 +85,14 @@ const addCommentReports= async (details, commentID) => {
     return response;
 }
 
+const cancelProject = async (projectID) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.patch(`${API_URL}/projects/${projectID}/cancel`);
+    return response;
+}
 export {
     addProject,
     getProject,
@@ -98,5 +106,6 @@ export {
     addRatings,
     addProjectReports,
     addCommentReports,
-    getSimilarProjects
+    getSimilarProjects,
+    cancelProject
 }

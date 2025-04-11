@@ -1,32 +1,26 @@
 import { useState } from "react";
-import { addCommentReports } from "../../../lib/projects";
+import { cancelProject } from "../../../lib/projects";
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
-
-export default function CommentReportForm({ id }) {
+export default function ProjectCancelForm({ id }) {
     const [isBackDialogOpen, setIsBackDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [comment, setComment] = useState('')
-
-    const handleReport = async () => {
-        if (!comment) return;
-
+    const navigate = useNavigate()
+    const handleCancel = async () => {
         setIsLoading(true);
 
         try {
-            const response = await addCommentReports({
-                details: comment
-            }, id)
-
-            if (response.status !== 201) {
-                throw new Error('Failed to process report');
+            const response = await cancelProject(id)
+            console.log(response)
+            if (response.status !== 200) {
+                throw new Error('Failed to process Cancel');
             }
-            toast.success(`Thank you for your Report!`);
+            toast.success(`Project is Canceld!`);
             setIsBackDialogOpen(false);
-            setComment("")
+            navigate("/profile")
         } catch (error) {
             if (error.status === 401) {
                 toast.error("Please login in first to report");
@@ -48,28 +42,16 @@ export default function CommentReportForm({ id }) {
                     className="w-full mb-2"
                     variant="destructive"
                 >
-                    Report
+                    Cancel
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Report this Comment</DialogTitle>
+                    <DialogTitle>Cancel this Project</DialogTitle>
                     <DialogDescription>
-                        Your report will be seen by admins
+                        You cant open a proect again after canceling
                     </DialogDescription>
                 </DialogHeader>
-                <div className="py-4 space-y-4">
-                    <div>
-                        <label className="text-sm font-medium mb-2 block">
-                            Report details
-                        </label>
-                        <Input
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            placeholder="Leave a comment"
-                        />
-                    </div>
-                </div>
 
                 <DialogFooter>
                     <Button
@@ -79,8 +61,7 @@ export default function CommentReportForm({ id }) {
                         Cancel
                     </Button>
                     <Button
-                        onClick={handleReport}
-                        disabled={!comment || isLoading}
+                        onClick={handleCancel}
                     >
                         {isLoading ? "Processing..." : "Complete Report"}
                     </Button>

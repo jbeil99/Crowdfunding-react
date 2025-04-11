@@ -77,6 +77,18 @@ export const logout = createAsyncThunk(
   }
 );
 
+export const getUser = createAsyncThunk(
+  'auth/getUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getCurrentUser();
+      return res;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+)
+
 
 const initialState = {
   user: null,
@@ -144,6 +156,18 @@ const authSlice = createSlice({
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(getUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      }).addCase(getUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        state.error = null;
       })
   },
 });

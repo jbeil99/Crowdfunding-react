@@ -39,7 +39,9 @@ export default function RatingForm({ id }) {
                 toast.error("Please login in first to rate");
 
             } else {
-                toast.error('Failed to process rating: ' + error.message);
+                for (const k of Object.keys(error.response.data)) {
+                    toast.error('Failed to process report: ' + error.response.data[k].join("\n"));
+                }
             }
         } finally {
             setIsLoading(false);
