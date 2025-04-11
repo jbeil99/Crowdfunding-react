@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import CampaignDetail from './components/CampaignDetail';
-import { getProject } from '../../lib/projects';
+import { getProject, getSimilarProjects } from '../../lib/projects';
+import CampaignSlider from '../home/components/CampaignSlider';
 
 const CampaignDetailPage = () => {
   const { id } = useParams();
   const [campaign, setCampaign] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [similarProjects, setSimilarProjects] = useState([]);
 
 
   const fetchCampaign = async () => {
@@ -18,8 +20,9 @@ const CampaignDetailPage = () => {
       if (response.status !== 200) {
         throw new Error('Failed to fetch campaign');
       }
-
+      const responseProjects = await getSimilarProjects(response.data.tags);
       setCampaign(response.data);
+      setSimilarProjects(responseProjects.data.results)
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       setError(error.message);
@@ -31,8 +34,10 @@ const CampaignDetailPage = () => {
 
 
 
+
   useEffect(() => {
     fetchCampaign();
+
   }, []);
   // Handle case where campaign is not found
   if (!campaign) {
@@ -58,7 +63,10 @@ const CampaignDetailPage = () => {
           Try Again
         </Button>
       </div>
-    ) : <CampaignDetail campaign={campaign} />}
+    ) : <div>
+      <CampaignDetail campaign={campaign} />
+      <CampaignSlider title="Similar Projects" campaigns={similarProjects} />
+    </div>}
   </>
 };
 

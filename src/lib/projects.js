@@ -28,7 +28,10 @@ const getTopProjects = async () => {
     const response = await axios.get(`${API_URL}/projects?is_top=true`);
     return response;
 }
-
+const getSimilarProjects = async (tags) => {
+    const response = await axios.get(`${API_URL}/projects?tags=${tags.join(",")}`);
+    return response;
+}
 const addComment = async (comment, projectID) => {
     const token = sessionStorage.getItem('accessToken');
     const headers = {
@@ -94,5 +97,6 @@ export {
     addDonation,
     addRatings,
     addProjectReports,
-    addCommentReports
+    addCommentReports,
+    getSimilarProjects
 }
