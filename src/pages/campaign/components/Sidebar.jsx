@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
 import DonationForm from "./DonationForm";
 import RatingForm from "./RatingForm";
+import PorjectReportForm from "./PorjectReportForm";
 
 
 
@@ -44,6 +43,7 @@ export default function SideBar({ campaign, id }) {
 
                     <DonationForm id={id} />
                     <RatingForm id={id} />
+                    <PorjectReportForm id={id} />
                 </CardContent>
                 <CardFooter className="bg-gray-50 text-sm text-gray-500 border-t">
                     <p>This project will only be funded if it reaches its goal by the deadline.</p>

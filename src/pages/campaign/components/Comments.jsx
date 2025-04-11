@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { addComment } from "../../../lib/projects";
+import { Button } from "@/components/ui/button";
+import CommentReportForm from "./CommentReportForm";
 
 export default function Comments({ projectID }) {
     const [commentList, setCommentList] = useState([]);
@@ -117,10 +119,17 @@ export default function Comments({ projectID }) {
                                     alt={`${item.user.first_name || 'User'} ${item.user.last_name || ''}`}
                                     className="w-10 h-10 rounded-full object-cover"
                                 />
-                                <div>
-                                    <p className="text-gray-800 text-sm break-words break-all whitespace-pre-wrap">
-                                        {item.body}
-                                    </p>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start">
+                                        <p className="text-gray-800 text-sm break-words break-all whitespace-pre-wrap">
+                                            {item.body}
+                                        </p>
+                                        <div className="ml-2 shrink-0">
+                                            <div className="text-xs">
+                                                <CommentReportForm id={item.id} />
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className="mt-2 text-xs text-gray-500">
                                         By {item.user.first_name} {item.user.last_name} •{" "}
                                         {new Date(item.created_at).toLocaleString()}
@@ -133,6 +142,8 @@ export default function Comments({ projectID }) {
             ) : (
                 <div className="text-center py-8 text-gray-500">No comments yet.</div>
             )}
+
+
 
             {nextPageUrl && (
                 <div className="text-center mt-4">
