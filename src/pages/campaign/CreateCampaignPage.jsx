@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { validateFormData } from "../../lib/validation"
 import { addProject } from '../../lib/projects';
+import { getCategories } from '../../lib/projects';
+
 
 const CreateCampaignPage = () => {
+  const [categories, setCategories] = useState([])
   const navigate = useNavigate()
   const [formStep, setFormStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -18,15 +22,77 @@ const CreateCampaignPage = () => {
     total_target: '',
     start_time: '',
     end_time: '',
-    images: []
+    category: '',
+    tags: [],
+    images: [],
+    thumbnail: null // Add thumbnail field
   });
+  const [tagInput, setTagInput] = useState('');
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
+  useEffect(() => {
+    getCategories().then(res => setCategories(res.data))
+  }, [])
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleCategoryChange = (value) => {
+    setFormData((prev) => ({ ...prev, category: value }));
+    setTouched((prev) => ({ ...prev, category: true }));
+
+    // Validate the specific field
+    const fieldErrors = validateFormData({ ...formData, category: value }, formStep);
+    setErrors((prev) => ({ ...prev, category: fieldErrors.category }));
+  };
+
+  const handleTagInputChange = (e) => {
+    setTagInput(e.target.value);
+  };
+
+  const addTag = (e) => {
+    e.preventDefault();
+    if (tagInput.trim() === '') return;
+
+    // Prevent duplicate tags
+    if (formData.tags.includes(tagInput.trim())) {
+      toast.error('This tag already exists');
+      return;
+    }
+
+    // Limit to 10 tags
+    if (formData.tags.length >= 10) {
+      toast.error('Maximum 10 tags allowed');
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      tags: [...prev.tags, tagInput.trim()]
+    }));
+
+    setTouched((prev) => ({ ...prev, tags: true }));
+    setTagInput('');
+
+    // Clear tag errors if we now have at least one tag
+    if (errors.tags && formData.tags.length === 0) {
+      setErrors((prev) => ({ ...prev, tags: undefined }));
+    }
+  };
+
+  const removeTag = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((_, index) => index !== indexToRemove)
+    }));
+
+    // Add validation if tags are required and we've removed all tags
+    if (formData.tags.length === 1) {
+      setErrors((prev) => ({ ...prev, tags: 'At least one tag is required' }));
+    }
   };
 
   const handleBlur = (e) => {
@@ -36,6 +102,34 @@ const CreateCampaignPage = () => {
     // Validate the specific field
     const fieldErrors = validateFormData({ ...formData }, formStep);
     setErrors((prev) => ({ ...prev, [name]: fieldErrors[name] }));
+  };
+
+  // Handle thumbnail change
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        thumbnail: file
+      }));
+      setTouched((prev) => ({ ...prev, thumbnail: true }));
+
+      // Clear any previous thumbnail errors
+      setErrors((prev) => ({ ...prev, thumbnail: undefined }));
+    }
+  };
+
+  // Remove thumbnail
+  const removeThumbnail = () => {
+    setFormData((prev) => ({
+      ...prev,
+      thumbnail: null
+    }));
+
+    // If thumbnail is required, set error
+    if (touched.thumbnail) {
+      setErrors((prev) => ({ ...prev, thumbnail: 'Thumbnail is required' }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -83,12 +177,12 @@ const CreateCampaignPage = () => {
     if (Object.keys(validationErrors).length > 0) {
       toast.error('Please fix the errors in the form');
 
-      if (validationErrors.title || validationErrors.total_target ||
-        validationErrors.start_time || validationErrors.end_time) {
+      if (validationErrors.title || validationErrors.category || validationErrors.tags ||
+        validationErrors.total_target || validationErrors.start_time || validationErrors.end_time) {
         setFormStep(1);
       } else if (validationErrors.details) {
         setFormStep(2);
-      } else if (validationErrors.images) {
+      } else if (validationErrors.images || validationErrors.thumbnail) {
         setFormStep(3);
       }
 
@@ -102,6 +196,15 @@ const CreateCampaignPage = () => {
       formDataToSend.append('total_target', formData.total_target);
       formDataToSend.append('start_time', formData.start_time);
       formDataToSend.append('end_time', formData.end_time);
+      formDataToSend.append('category', formData.category);
+
+      // Append tags as JSON string or as separate values based on API requirements
+      formDataToSend.append('tags', JSON.stringify(formData.tags));
+
+      // Append thumbnail
+      if (formData.thumbnail) {
+        formDataToSend.append('thumbnail', formData.thumbnail);
+      }
 
       formData.images.forEach(image => {
         formDataToSend.append('images', image);
@@ -110,13 +213,19 @@ const CreateCampaignPage = () => {
       const response = await addProject(formDataToSend);
       if (response.status == 201) {
         toast.success('Project created successfully!');
-        // navigate('/discover')
+        navigate(`/campaign/${response.data.id}`)
       } else {
         const errorData = await response.json();
         toast.error(`Failed to create project: ${errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
-      toast.error(`Error: ${error.message}`);
+      if (error.status === 401) {
+        toast.error("Please login in first to add a campaign");
+      } else {
+        for (const k of Object.keys(error.response.data)) {
+          toast.error('Failed to process campaign: ' + error.response.data[k].join("\n"));
+        }
+      }
     }
   };
 
@@ -126,22 +235,29 @@ const CreateCampaignPage = () => {
 
     let fieldsToTouch = {};
     if (formStep === 1) {
-      fieldsToTouch = { title: true, total_target: true, start_time: true, end_time: true };
+      fieldsToTouch = {
+        title: true,
+        total_target: true,
+        start_time: true,
+        end_time: true,
+        category: true,
+        tags: true
+      };
     } else if (formStep === 2) {
       fieldsToTouch = { details: true };
     } else if (formStep === 3) {
-      fieldsToTouch = { images: true };
+      fieldsToTouch = { images: true, thumbnail: true };
     }
 
     setTouched(prev => ({ ...prev, ...fieldsToTouch }));
 
     const stepErrors = Object.keys(validationErrors).filter(key => {
       if (formStep === 1) {
-        return ['title', 'total_target', 'start_time', 'end_time'].includes(key);
+        return ['title', 'total_target', 'start_time', 'end_time', 'category', 'tags'].includes(key);
       } else if (formStep === 2) {
         return key === 'details';
       } else if (formStep === 3) {
-        return key === 'images';
+        return ['images', 'thumbnail'].includes(key);
       }
       return false;
     });
@@ -238,6 +354,77 @@ const CreateCampaignPage = () => {
                       {errors.title && touched.title && (
                         <p className="mt-1 text-sm text-red-500">{errors.title}</p>
                       )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="category" className="mb-2 block text-sm font-medium">
+                        Project Category*
+                      </label>
+                      <Select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onValueChange={handleCategoryChange}
+                        required
+                      >
+                        <SelectTrigger className={errors.category && touched.category ? "border-red-500" : ""}>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.category && touched.category && (
+                        <p className="mt-1 text-sm text-red-500">{errors.category}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="tags" className="mb-2 block text-sm font-medium">
+                        Project Tags* (Add up to 10 tags)
+                      </label>
+                      <div className="flex">
+                        <Input
+                          id="tagInput"
+                          name="tagInput"
+                          value={tagInput}
+                          onChange={handleTagInputChange}
+                          placeholder="Enter a tag and press Add"
+                          className="mr-2"
+                        />
+                        <Button type="button" onClick={addTag} variant="outline">
+                          Add
+                        </Button>
+                      </div>
+                      {errors.tags && touched.tags && (
+                        <p className="mt-1 text-sm text-red-500">{errors.tags}</p>
+                      )}
+
+                      {formData.tags.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {formData.tags.map((tag, index) => (
+                            <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                              {tag}
+                              <button
+                                type="button"
+                                onClick={() => removeTag(index)}
+                                className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-1 text-xs text-gray-500">
+                        {formData.tags.length}/10 tags added
+                      </div>
                     </div>
 
                     <div>
@@ -360,6 +547,69 @@ const CreateCampaignPage = () => {
                     Add images to help tell your story and engage potential backers.
                   </p>
 
+                  {/* Thumbnail upload section */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium">
+                      Project Thumbnail* (Cover image for your project)
+                    </label>
+                    <div className={`mt-1 flex cursor-pointer justify-center rounded-lg border border-dashed ${errors.thumbnail && touched.thumbnail ? "border-red-500" : "border-gray-300"
+                      } px-6 py-5`}>
+                      <div className="space-y-1 text-center">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <label htmlFor="thumbnail" className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80">
+                            <span>Upload thumbnail</span>
+                            <input
+                              id="thumbnail"
+                              name="thumbnail"
+                              type="file"
+                              accept="image/*"
+                              className="sr-only"
+                              onChange={handleThumbnailChange}
+                              required={!formData.thumbnail}
+                            />
+                          </label>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                      </div>
+                    </div>
+                    {errors.thumbnail && touched.thumbnail && (
+                      <p className="mt-1 text-sm text-red-500">{errors.thumbnail}</p>
+                    )}
+
+                    {formData.thumbnail && (
+                      <div className="mt-4">
+                        <h3 className="mb-2 text-sm font-medium">Thumbnail Preview</h3>
+                        <div className="relative">
+                          <div className="h-32 w-full overflow-hidden rounded-lg bg-gray-100">
+                            <img
+                              src={URL.createObjectURL(formData.thumbnail)}
+                              alt="Thumbnail"
+                              className="h-full w-full object-cover"
+                              onLoad={() => { URL.revokeObjectURL(formData.thumbnail) }}
+                            />
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-1 text-xs text-white">
+                            <p className="truncate">{formData.thumbnail.name} ({(formData.thumbnail.size / (1024 * 1024)).toFixed(2)} MB)</p>
+                          </div>
+                          <button
+                            type="button"
+                            className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                            onClick={removeThumbnail}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <label className="mb-2 block text-sm font-medium">
                       Project Images* (Maximum 5)
@@ -401,12 +651,15 @@ const CreateCampaignPage = () => {
                           {formData.images.map((image, index) => (
                             <div key={index} className="relative">
                               <div className="h-24 w-full overflow-hidden rounded-lg bg-gray-100">
-                                <div className="flex h-full items-center justify-center">
-                                  <p className="text-xs text-gray-500">{image.name}</p>
-                                  <p className="text-xs text-gray-400">
-                                    ({(image.size / (1024 * 1024)).toFixed(2)} MB)
-                                  </p>
-                                </div>
+                                <img
+                                  src={URL.createObjectURL(image)}
+                                  alt={image.name}
+                                  className="h-full w-full object-cover"
+                                  onLoad={() => { URL.revokeObjectURL(image) }}
+                                />
+                              </div>
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-1 text-xs text-white">
+                                <p className="truncate">{image.name} ({(image.size / (1024 * 1024)).toFixed(2)} MB)</p>
                               </div>
                               <button
                                 type="button"
@@ -435,6 +688,7 @@ const CreateCampaignPage = () => {
                 </div>
               )}
 
+
               {formStep === 4 && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold">Review & Launch</h2>
@@ -446,6 +700,10 @@ const CreateCampaignPage = () => {
                     <h3 className="mb-3 font-bold">{formData.title || 'Project Title'}</h3>
 
                     <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-1">
+                        <div className="text-xs text-gray-500">Category</div>
+                        <div>{formData.category || 'Not specified'}</div>
+                      </div>
                       <div className="space-y-1">
                         <div className="text-xs text-gray-500">Funding Goal</div>
                         <div>${formData.total_target || '0'}</div>
@@ -463,6 +721,19 @@ const CreateCampaignPage = () => {
                         <div>{formData.images.length} images uploaded</div>
                       </div>
                     </div>
+
+                    {formData.tags.length > 0 && (
+                      <div className="mt-4 space-y-1">
+                        <div className="text-xs text-gray-500">Tags</div>
+                        <div className="flex flex-wrap gap-1">
+                          {formData.tags.map((tag, index) => (
+                            <Badge key={index} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mt-4 space-y-1">
                       <div className="text-xs text-gray-500">Details</div>

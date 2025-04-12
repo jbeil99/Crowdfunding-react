@@ -118,6 +118,12 @@ const getUserDonations = async (userID) => {
     const response = await axios.patch(`${API_URL}/users/${userID}/donations`, {headers});
     return response;
 }
+
+const getCategories =  async () => {
+    const response = await axios.get(`${API_URL}/category`);
+    return response;
+}
+
 export {
     addProject,
     getProject,
@@ -134,5 +140,6 @@ export {
     getSimilarProjects,
     cancelProject,
     getUserDonations,
-    getDonations
+    getDonations,
+    getCategories
 }

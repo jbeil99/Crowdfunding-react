@@ -29,7 +29,7 @@ const CampaignCard = ({ campaign }) => {
       <Link to={`/campaign/${campaign.id}`}>
         <div className="aspect-video w-full overflow-hidden">
           <img
-            src={campaign.thumbnail}
+            src={campaign.thumbnail_url}
             alt={campaign.title}
             className="h-full w-full object-cover transition-transform hover:scale-105"
           />
