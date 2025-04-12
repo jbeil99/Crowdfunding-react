@@ -73,7 +73,7 @@ const CampaignDetail = ({ campaign }) => {
           </div>
 
           {/* Comment Section */}
-          <Activites comments={campaign.comments} ratings={campaign.ratings} donations={campaign.donations} id={id} />
+          <Activites ratings={campaign.ratings} donations={campaign.donations} id={id} />
         </div>
 
         {/* Sidebar */}

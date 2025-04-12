@@ -50,13 +50,29 @@ const addDonation = async (donation, projectID) => {
     return response;
 }
 
-const getComments = async (projectID) => {
+const getComments = async (projectID, url= null) => {
+    if (url) {
+        const response = await axios.get(url);
+        return response;
+    }
     const response = await axios.get(`${API_URL}/projects/${projectID}/comments?page_size=4`);
     return response;
 }
 
-const getRatings = async (projectID) => {
+const getRatings = async (projectID, url) => {
+    if (url) {
+        const response = await axios.get(url);
+        return response;
+    }
     const response = await axios.get(`${API_URL}/projects/${projectID}/ratings?page_size=4`);
+    return response;
+}
+const getDonations = async (projectID, url) => {
+    if (url) {
+        const response = await axios.get(url);
+        return response;
+    }
+    const response = await axios.get(`${API_URL}/projects/${projectID}/donations?page_size=4`);
     return response;
 }
 
@@ -117,5 +133,6 @@ export {
     addCommentReports,
     getSimilarProjects,
     cancelProject,
-    getUserDonations
+    getUserDonations,
+    getDonations
 }

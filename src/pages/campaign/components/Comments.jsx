@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { addComment } from "../../../lib/projects";
+import { addComment, getComments } from "../../../lib/projects";
 import CommentReportForm from "./CommentReportForm";
 
 export default function Comments({ projectID }) {
@@ -10,7 +10,6 @@ export default function Comments({ projectID }) {
     const [nextPageUrl, setNextPageUrl] = useState(null);
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const initialUrl = `http://127.0.0.1:8000/api/projects/${projectID}/comments?page_size=4`;
 
     const validateComment = () => {
         if (!comment.trim()) {
@@ -26,7 +25,7 @@ export default function Comments({ projectID }) {
     };
     const fetchComments = async (url) => {
         try {
-            const response = await axios.get(url);
+            const response = await getComments(projectID, url);
             const data = response.data;
             setCommentList((prev) => {
                 if (commentList.length > 0) {
@@ -45,7 +44,7 @@ export default function Comments({ projectID }) {
     };
 
     useEffect(() => {
-        fetchComments(initialUrl);
+        fetchComments();
     }, [projectID]);
 
     const handleLoadMore = () => {
@@ -114,8 +113,8 @@ export default function Comments({ projectID }) {
                         <li key={item.id} className="border rounded-lg p-4 bg-gray-50">
                             <div className="flex items-start space-x-4">
                                 <img
-                                    src={item.user.profile_picture || "http://127.0.0.1:8000/media/images/default_avatar.jpg"}
-                                    alt={`${item.user.first_name || 'User'} ${item.user.last_name || ''}`}
+                                    src={item.user?.profile_picture || "http://127.0.0.1:8000/media/images/default_avatar.jpg"}
+                                    alt={`${item.user?.first_name || 'User'} ${item.user?.last_name || ''}`}
                                     className="w-10 h-10 rounded-full object-cover"
                                 />
                                 <div className="flex-1">
@@ -130,7 +129,7 @@ export default function Comments({ projectID }) {
                                         </div>
                                     </div>
                                     <div className="mt-2 text-xs text-gray-500">
-                                        By {item.user.first_name} {item.user.last_name} •{" "}
+                                        By {item.user?.first_name ? `${item.user?.first_name} ${item.user?.last_name}` : "Anon"} •{" "}
                                         {new Date(item.created_at).toLocaleString()}
                                     </div>
                                 </div>

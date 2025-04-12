@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import CampaignDetail from './components/CampaignDetail';
 import { getProject, getSimilarProjects } from '../../lib/projects';
 import CampaignSlider from '../home/components/CampaignSlider';
-import { useSelector, useDispatch } from "react-redux";
-import { getUser } from '../../store/auth';
 
 
 const CampaignDetailPage = () => {
@@ -14,8 +12,6 @@ const CampaignDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [similarProjects, setSimilarProjects] = useState([]);
-  const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch()
 
   const fetchCampaign = async () => {
     setIsLoading(true);
@@ -37,7 +33,6 @@ const CampaignDetailPage = () => {
 
   useEffect(() => {
     fetchCampaign();
-    dispatch(getUser())
   }, []);
 
   if (!campaign) {

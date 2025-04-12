@@ -14,7 +14,9 @@ export default function SideBar({ campaign, id }) {
     const dispatch = useDispatch()
     const percentRaised = Math.round((campaign.total_donations / campaign.total_target) * 100);
     useEffect(() => {
-        dispatch(getUser())
+        if (sessionStorage.getItem('accessToken')) {
+            dispatch(getUser())
+        }
     }, [id])
 
     return (

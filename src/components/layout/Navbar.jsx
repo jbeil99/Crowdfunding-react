@@ -16,7 +16,9 @@ const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(getUser())
+    if (sessionStorage.getItem('accessToken')) {
+      dispatch(getUser())
+    }
 
   }, [dispatch])
 

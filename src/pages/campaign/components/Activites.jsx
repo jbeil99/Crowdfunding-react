@@ -40,11 +40,11 @@ export default function Activities({ comments, ratings, donations, id }) {
             )}
 
             {selectedTab === "donations" && (
-                <Donations donations={donations} />
+                <Donations projectID={id} />
             )}
 
             {selectedTab === "ratings" && (
-                <Ratings ratings={ratings} />
+                <Ratings projectID={id} />
             )}
         </div>
     );
