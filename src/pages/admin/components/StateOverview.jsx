@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 
 
-export default function StateOverview({ campaigns, count }) {
+export default function StateOverview({ campaigns, count, statistics }) {
     const totalCampaigns = count;
-    const approvedCampaigns = campaigns.filter(c => c.is_active).length;
-    const featuredCampaigns = campaigns.filter(c => c.is_featured).length;
-    const totalTarget = campaigns.reduce((sum, campaign) => sum + parseFloat(campaign.total_target), 0);
+    const approvedCampaigns = statistics.total_active_projects;
+    const featuredCampaigns = statistics.total_featured;
+    const totalDonations = statistics.total_money_raised;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -42,8 +42,8 @@ export default function StateOverview({ campaigns, count }) {
             <Card>
                 <CardContent className="flex items-center justify-between pt-6">
                     <div>
-                        <p className="text-sm font-medium text-gray-500">Total Target</p>
-                        <p className="text-2xl font-bold">${totalTarget.toLocaleString()}</p>
+                        <p className="text-sm font-medium text-gray-500">Total Donations</p>
+                        <p className="text-2xl font-bold">${totalDonations}</p>
                     </div>
                     <DollarSign className="h-8 w-8 text-green-500" />
                 </CardContent>

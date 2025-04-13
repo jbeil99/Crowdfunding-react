@@ -18,7 +18,7 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table';
-
+import { getMemberSince } from '../../../lib/helpers';
 
 export default function UsersTab({ users }) {
     return (
@@ -34,21 +34,15 @@ export default function UsersTab({ users }) {
                             <TableRow>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Email</TableHead>
-                                <TableHead>Campaigns Created</TableHead>
-                                <TableHead>Campaigns Backed</TableHead>
-                                <TableHead>Total Donated</TableHead>
                                 <TableHead>Join Date</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.map((user) => (
                                 <TableRow key={user.id}>
-                                    <TableCell className="font-medium">{user.name}</TableCell>
+                                    <TableCell className="font-medium">{user.first_name} {user.last_name}</TableCell>
                                     <TableCell>{user.email}</TableCell>
-                                    <TableCell>{user.campaigns}</TableCell>
-                                    <TableCell>{user.backed}</TableCell>
-                                    <TableCell>${user.totalDonated}</TableCell>
-                                    <TableCell>{user.joinDate}</TableCell>
+                                    <TableCell>{getMemberSince(user.created_at)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

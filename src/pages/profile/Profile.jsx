@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } f
 import { Input } from "@/components/ui/input";
 import { deleteUser } from "../../lib/profile";
 import { toast } from "sonner";
+import { getMemberSince } from "../../lib/helpers";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -30,11 +31,7 @@ export default function ProfilePage() {
     dispatch(getUser());
   }, [dispatch]);
 
-  const getMemberSince = (createdAt) => {
-    const date = new Date(createdAt);
-    const options = { year: "numeric", month: "long" };
-    return date.toLocaleDateString("en-US", options);
-  };
+
 
   const handleDeleteAccount = async () => {
     if (!currentPassword) return;

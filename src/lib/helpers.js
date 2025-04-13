@@ -6,3 +6,9 @@ export const calculateDaysLeft = (campaign) => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
   };
+
+  export  const getMemberSince = (createdAt) => {
+    const date = new Date(createdAt);
+    const options = { year: "numeric", month: "long" };
+    return date.toLocaleDateString("en-US", options);
+  };

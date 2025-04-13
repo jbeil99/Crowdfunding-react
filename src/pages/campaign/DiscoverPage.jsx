@@ -3,6 +3,7 @@ import CampaignCard from './components//CampaignCard';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getCategories, getProjects } from '../../lib/projects';
 
 const DiscoverPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,80 +11,60 @@ const DiscoverPage = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [nextPageUrl, setNextPageUrl] = useState();
 
-  const [pagination, setPagination] = useState({
-    count: 0,
-    next: null,
-    previous: null,
-    currentPage: 1
-  });
 
-  const fetchCampaigns = async (url) => {
+  const fetchData = async (url) => {
     setIsLoading(true);
     try {
-      // Use the provided URL or default to the first page
-      const apiUrl = url || 'http://127.0.0.1:8000/api/projects';
-      const response = await fetch(apiUrl);
+      const [campaigns, allcategories] = await Promise.all([
+        getProjects(url),
+        getCategories(),
+      ]);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch campaigns');
-      }
-
-      const data = await response.json();
-
-      setCampaigns(data.results);
-      setPagination({
-        count: data.count,
-        next: data.next,
-        previous: data.previous,
-        currentPage: getPageNumberFromUrl(url) || 1
+      const data = campaigns.data;
+      setCampaigns((prev) => {
+        if (url) {
+          return [...prev, ...data.results];
+        } else {
+          return data.results;
+        }
       });
-    } catch (error) {
-      console.error('Error fetching campaigns:', error);
-      setError(error.message);
+      setCategories(allcategories.data)
+      setNextPageUrl(data.next);
+    } catch (err) {
+      console.error("Failed to fetch data:", err);
+      setError("Something went wrong while fetching data.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Helper function to extract page number from URL
-  const getPageNumberFromUrl = (url) => {
-    if (!url) return 1;
-    const match = url.match(/page=(\d+)/);
-    return match ? parseInt(match[1]) : 1;
-  };
-
   useEffect(() => {
-    fetchCampaigns();
+    fetchData();
   }, []);
 
-  // We need to ensure campaigns exists before getting categories
-  const categories = campaigns?.length ? [...new Set(campaigns.map(campaign => campaign.category).filter(Boolean))] : [];
+  const handleLoadMore = () => {
+    if (nextPageUrl) {
+      setIsLoading(true);
+      fetchData(nextPageUrl);
+    }
+  }
+
+
+
 
   const filteredCampaigns = campaigns?.filter(campaign => {
     const matchesSearch = searchTerm === '' ||
       campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       campaign.details.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = selectedCategory === '' || campaign.category === selectedCategory;
-
+    const matchesCategory = selectedCategory === '' || campaign.category_detail.title === selectedCategory;
     return matchesSearch && matchesCategory;
   }) || [];
 
-  const handleNextPage = () => {
-    if (pagination.next) {
-      fetchCampaigns(pagination.next);
-    }
-  };
 
-  const handlePrevPage = () => {
-    if (pagination.previous) {
-      fetchCampaigns(pagination.previous);
-    }
-  };
-
-  // Calculate total pages
-  const totalPages = Math.ceil(pagination.count / (campaigns.length || 10));
 
   return (
     <div className="container mx-auto py-8">
@@ -112,7 +93,7 @@ const DiscoverPage = () => {
             <Button
               key={category}
               variant={selectedCategory === category ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => setSelectedCategory(category.title)}
               size="sm"
             >
               {category.title}
@@ -139,33 +120,6 @@ const DiscoverPage = () => {
               <CampaignCard key={campaign.id} campaign={campaign} />
             ))}
           </div>
-
-          {/* Pagination controls */}
-          <div className="flex justify-between items-center mt-8">
-            <div className="text-sm text-gray-500">
-              Showing page {pagination.currentPage} of {totalPages} ({pagination.count} total campaigns)
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrevPage}
-                disabled={!pagination.previous}
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNextPage}
-                disabled={!pagination.next}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-          </div>
         </>
       ) : (
         <div className="text-center py-12">
@@ -182,6 +136,17 @@ const DiscoverPage = () => {
           >
             Clear Filters
           </Button>
+        </div>
+      )}
+
+      {nextPageUrl && (
+        <div className="text-center mt-4">
+          <button
+            onClick={handleLoadMore}
+            className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Load More
+          </button>
         </div>
       )}
     </div>

@@ -41,6 +41,7 @@ import { toast } from 'sonner';
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const [campaigns, setCampaigns] = useState([]);
+    const [statistics, setStatistics] = useState({});
     const [count, setCount] = useState(0);
     const [users, setUsers] = useState([]);
     const [comments, setComments] = useState([]);
@@ -75,6 +76,7 @@ export default function AdminDashboard() {
                     return data.results;
                 }
             });
+            setStatistics(campaigns.data.statistics)
             setCount(data.count);
             setUsers(users.data.results);
             setComments(comments.data.results);
@@ -218,7 +220,7 @@ export default function AdminDashboard() {
             {/* Main Content */}
             <main className="flex-1 p-6">
                 {/* Stats Overview */}
-                <StateOverview campaigns={campaigns} count={count} />
+                <StateOverview campaigns={campaigns} count={count} statistics={statistics} />
 
                 {/* Main Tabs */}
                 <Tabs defaultValue="campaigns" className="w-full">
