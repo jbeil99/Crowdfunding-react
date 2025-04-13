@@ -48,6 +48,7 @@ export const register = createAsyncThunk(
       });
       return response;
     } catch (error) {
+      console.log(error)
       const errorMessage = error.response?.data || {
         detail: "Registration failed. Please try again."
       };

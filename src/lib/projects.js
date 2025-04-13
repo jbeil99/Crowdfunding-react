@@ -16,6 +16,25 @@ const getProject = async (id) => {
     return response;
 }
 
+const getProjects = async () => {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/api/projects/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch projects');
+        }
+        return {
+            status: response.status,
+            data: await response.json()
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        return {
+            status: 500,
+            error: error.message
+        };
+    }
+};
+
 const getFeaturedProjects = async () => {
     const response = await axios.get(`${API_URL}/projects?is_featured=true`);
     return response;
@@ -124,6 +143,70 @@ const getCategories =  async () => {
     return response;
 }
 
+export const getCommentsReported = async () => {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/api/comments/reports');
+        if (!response.ok) {
+            throw new Error('Failed to fetch reported comments');
+        }
+        return {
+            status: response.status,
+            data: await response.json()
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        return {
+            status: 500,
+            error: error.message
+        };
+    }
+};
+
+export const getUsers = async () => {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/api/users/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch users');
+        }
+        return {
+            status: response.status,
+            data: await response.json()
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        return {
+            status: 500,
+            error: error.message
+        };
+    }
+};
+
+export const updateCampaignStatus = async (projectId, isActive) => {
+    try {
+        const token = sessionStorage.getItem('accessToken');
+        const response = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/status/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ is_active: isActive })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update campaign status');
+        }
+        
+        return {
+            status: response.status,
+            data: await response.json()
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};
+
 export {
     addProject,
     getProject,
@@ -141,5 +224,6 @@ export {
     cancelProject,
     getUserDonations,
     getDonations,
-    getCategories
+    getCategories,
+    getProjects
 }

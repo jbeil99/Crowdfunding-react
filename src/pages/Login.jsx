@@ -37,7 +37,7 @@ export default function LoginPage() {
     try {
       const result = await dispatch(login(formData)).unwrap();
       if (result) {
-        navigate("/dashboard");
+        navigate("/profile");
       }
     } catch (error) {
       const errorMessage = error || "An error occurred during login";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "@/store/auth";
@@ -13,12 +13,28 @@ import {
 } from "@/components/ui/NewCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  re_password: z.string().min(1, "Please confirm your password"),
+  mobile_phone: z.string().min(10, "Valid phone number is required"),
+  profile_picture: z.any(),
+}).refine((data) => data.password === data.re_password, {
+  message: "Passwords do not match",
+  path: ["re_password"],
+});
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
+    username: "",
     password: "",
     re_password: "",
     mobile_phone: "",
@@ -26,9 +42,22 @@ export default function RegisterPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [validationErrors, setValidationErrors] = useState({});
+  const [previewUrl, setPreviewUrl] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading } = useSelector((state) => state.auth);
+
+  // Create preview URL when profile picture changes
+  useEffect(() => {
+    if (formData.profile_picture) {
+      const objectUrl = URL.createObjectURL(formData.profile_picture);
+      setPreviewUrl(objectUrl);
+
+      // Free memory when this component unmounts
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  }, [formData.profile_picture]);
 
   const handleChange = (e) => {
     const { id, value, files } = e.target;
@@ -45,16 +74,52 @@ export default function RegisterPage() {
     }
   };
 
+  const validateForm = () => {
+    try {
+      registerSchema.parse(formData);
+      setValidationErrors({});
+      return true;
+    } catch (error) {
+      const formattedErrors = {};
+      error.errors.forEach((err) => {
+        const path = err.path[0];
+        formattedErrors[path] = err.message;
+      });
+      setValidationErrors(formattedErrors);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Important: prevent default form submission
     setErrors({});
 
+    // Validate form with Zod
+    if (!validateForm()) {
+      return;
+    }
+
+
+    const submitData = new FormData();
+
+    Object.keys(formData).forEach(key => {
+      if (key === 'profile_picture') {
+        if (formData[key] instanceof File) {
+          submitData.append(key, formData[key]);
+        }
+      } else if (formData[key] !== null && formData[key] !== undefined) {
+        submitData.append(key, formData[key]);
+      }
+    });
+
+
     try {
-      const result = await dispatch(register(formData)).unwrap();
+      const result = await dispatch(register(submitData)).unwrap();
       if (result) {
         navigate("/login");
       }
     } catch (error) {
+      console.error('Registration error:', error);
       setErrors(error);
     }
   };
@@ -87,9 +152,10 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     placeholder="John"
                     required
+                    className={validationErrors.first_name ? "border-red-500" : ""}
                   />
-                  {errors.first_name && (
-                    <p className="text-xs text-red-500">{errors.first_name}</p>
+                  {(validationErrors.first_name || errors.first_name) && (
+                    <p className="text-xs text-red-500">{validationErrors.first_name || errors.first_name}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -100,11 +166,26 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     placeholder="Doe"
                     required
+                    className={validationErrors.last_name ? "border-red-500" : ""}
                   />
-                  {errors.last_name && (
-                    <p className="text-xs text-red-500">{errors.last_name}</p>
+                  {(validationErrors.last_name || errors.last_name) && (
+                    <p className="text-xs text-red-500">{validationErrors.last_name || errors.last_name}</p>
                   )}
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="johndoe"
+                  required
+                  className={validationErrors.username ? "border-red-500" : ""}
+                />
+                {(validationErrors.username || errors.username) && (
+                  <p className="text-xs text-red-500">{validationErrors.username || errors.username}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -115,9 +196,10 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="m@example.com"
                   required
+                  className={validationErrors.email ? "border-red-500" : ""}
                 />
-                {errors.email && (
-                  <p className="text-xs text-red-500">{errors.email}</p>
+                {(validationErrors.email || errors.email) && (
+                  <p className="text-xs text-red-500">{validationErrors.email || errors.email}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -129,9 +211,10 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="+201xxxxxxxxx"
                   required
+                  className={validationErrors.mobile_phone ? "border-red-500" : ""}
                 />
-                {errors.mobile_phone && (
-                  <p className="text-xs text-red-500">{errors.mobile_phone}</p>
+                {(validationErrors.mobile_phone || errors.mobile_phone) && (
+                  <p className="text-xs text-red-500">{validationErrors.mobile_phone || errors.mobile_phone}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -141,11 +224,24 @@ export default function RegisterPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleChange}
+                  className={validationErrors.profile_picture ? "border-red-500" : ""}
                 />
-                {errors.profile_picture && (
+                {(validationErrors.profile_picture || errors.profile_picture) && (
                   <p className="text-xs text-red-500">
-                    {errors.profile_picture}
+                    {validationErrors.profile_picture || errors.profile_picture}
                   </p>
+                )}
+                {previewUrl && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                    <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-200">
+                      <img
+                        src={previewUrl}
+                        alt="Profile preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="space-y-2">
@@ -156,12 +252,13 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  className={validationErrors.password ? "border-red-500" : ""}
                 />
                 <p className="text-xs text-gray-500">
                   Password must be at least 8 characters long
                 </p>
-                {errors.password && (
-                  <p className="text-xs text-red-500">{errors.password}</p>
+                {(validationErrors.password || errors.password) && (
+                  <p className="text-xs text-red-500">{validationErrors.password || errors.password}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -172,9 +269,10 @@ export default function RegisterPage() {
                   value={formData.re_password}
                   onChange={handleChange}
                   required
+                  className={validationErrors.re_password ? "border-red-500" : ""}
                 />
-                {errors.re_password && (
-                  <p className="text-xs text-red-500">{errors.re_password}</p>
+                {(validationErrors.re_password || errors.re_password) && (
+                  <p className="text-xs text-red-500">{validationErrors.re_password || errors.re_password}</p>
                 )}
               </div>
             </div>

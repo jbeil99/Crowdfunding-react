@@ -23,12 +23,12 @@ const profileSchema = z.object({
     .optional()
     .or(z.literal("")),
   profile_picture: z.any().optional(),
-  birthdate: z
+  date_of_birth: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date (YYYY-MM-DD)")
     .optional()
     .or(z.literal("")),
-  facebook_profile: z
+  facebook: z
     .string()
     .url("Enter a valid Facebook profile URL")
     .optional()
@@ -63,8 +63,8 @@ const EditProfileForm = () => {
       setValue("first_name", user.first_name || "");
       setValue("last_name", user.last_name || "");
       setValue("mobile_phone", user.mobile_phone || "");
-      setValue("birthdate", user.birthdate || "");
-      setValue("facebook_profile", user.facebook_profile || "");
+      setValue("date_of_birth", user.date_of_birth || "");
+      setValue("facebook", user.facebook || "");
       setValue("country", user.country || "");
     }
   }, [user, setValue]);
@@ -90,14 +90,23 @@ const EditProfileForm = () => {
   }
   const submitHandler = (data) => {
     const formData = new FormData();
-    for (const key in data) {
-      if (key === "profile_picture" && data[key].length == 0) {
-        continue
-      }
-      if (data[key]) {
+
+    Object.keys(data).forEach(key => {
+      if (key === "profile_picture") {
+        if (data[key] instanceof FileList && data[key].length > 0) {
+          formData.append(key, data[key][0]);
+        } else if (data[key] instanceof File) {
+          formData.append(key, data[key]);
+        }
+      } else if (data[key] !== undefined && data[key] !== "") {
         formData.append(key, data[key]);
       }
+    });
+
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
     }
+
     onSubmit(formData);
   };
 
@@ -186,23 +195,23 @@ const EditProfileForm = () => {
       </div>
 
       <div>
-        <Label htmlFor="birthdate">Birthdate</Label>
-        <Input id="birthdate" type="date" {...register("birthdate")} />
-        {errors.birthdate && (
-          <p className="text-red-500 text-sm">{errors.birthdate.message}</p>
+        <Label htmlFor="date_of_birth">Birthdate</Label>
+        <Input id="date_of_birth" type="date" {...register("date_of_birth")} />
+        {errors.date_of_birth && (
+          <p className="text-red-500 text-sm">{errors.date_of_birth.message}</p>
         )}
       </div>
 
       <div>
-        <Label htmlFor="facebook_profile">Facebook Profile</Label>
+        <Label htmlFor="facebook">Facebook Profile</Label>
         <Input
-          id="facebook_profile"
+          id="facebook"
           type="url"
-          {...register("facebook_profile")}
+          {...register("facebook")}
         />
-        {errors.facebook_profile && (
+        {errors.facebook && (
           <p className="text-red-500 text-sm">
-            {errors.facebook_profile.message}
+            {errors.facebook.message}
           </p>
         )}
       </div>

@@ -31,28 +31,28 @@ const getCurrentUser = async () => {
 }
 
 const register = async (userData) => {
-    const {
-        email,
-        password,
-        re_password,
-        first_name,
-        last_name,
-        mobile_phone,
-        profile_picture
-    } = userData;
+    // const {
+    //     email,
+    //     password,
+    //     re_password,
+    //     first_name,
+    //     last_name,
+    //     mobile_phone,
+    //     profile_picture
+    // } = userData;
 
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('re_password', re_password);
-    formData.append('first_name', first_name);
-    formData.append('last_name', last_name);
-    formData.append('mobile_phone', mobile_phone);
-    formData.append('username', email);
+    // const formData = new FormData();
+    // formData.append('email', email);
+    // formData.append('password', password);
+    // formData.append('re_password', re_password);
+    // formData.append('first_name', first_name);
+    // formData.append('last_name', last_name);
+    // formData.append('mobile_phone', mobile_phone);
+    // formData.append('username', email);
 
-    if (profile_picture) {
-        formData.append('profile_picture', profile_picture);
-    }
+    // if (profile_picture) {
+    //     formData.append('profile_picture', profile_picture);
+    // }
 
     const config = {
         headers: {
@@ -60,7 +60,7 @@ const register = async (userData) => {
         }
     };
 
-    const response = await axios.post(`${API_URL}/users/`, formData, config);
+    const response = await axios.post(`${API_URL}/users/`, userData, config);
     return response.data;
 };
 

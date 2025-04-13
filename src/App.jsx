@@ -14,6 +14,7 @@ import { RedirectIfAuthenticated, RedirectIfNotAuthenticated } from "./component
 import ActivateAccount from "./pages/AccountActivation";
 import ProfilePage from "./pages/profile/Profile";
 import EditProfileForm from "./pages/profile/EditProfile";
+import AdminDashboard from "./pages/admin/Dashboard";
 
 // Create a 404 page component
 const NotFoundPage = () => {
@@ -45,6 +46,9 @@ function App() {
             <Route path="/edit-profile" element={<EditProfileForm />} />
 
             <Route path="/activate/:uid/:token" element={<ActivateAccount />} />
+
+
+            <Route path="/dashboard" element={<AdminDashboard />} />
 
             <Route
               path="/profile"
