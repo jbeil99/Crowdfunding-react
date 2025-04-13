@@ -71,9 +71,9 @@ const CampaignCard = ({ campaign }) => {
 
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-2">
-            {campaign.category && (
+            {campaign.category_detail && (
               <span className="text-xs font-medium text-primary px-2 py-1 rounded-full bg-primary/10">
-                {campaign.category.title || "No Category"}
+                {campaign.category_detail.title || "No Category"}
               </span>
             )}
 
