@@ -22,7 +22,7 @@ const DiscoverPage = () => {
     setIsLoading(true);
     try {
       // Use the provided URL or default to the first page
-      const apiUrl = url || 'http://127.0.0.1:8000/api/projects/';
+      const apiUrl = url || 'http://127.0.0.1:8000/api/projects';
       const response = await fetch(apiUrl);
 
       if (!response.ok) {

@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Star } from "lucide-react";
+import { calculateDaysLeft } from '../../../lib/helpers';
+
+
 
 const CampaignCard = ({ campaign }) => {
-  const imageUrl = campaign.thumbnail || "/api/placeholder/400/225";
-
   const raisedAmount = campaign.total_donations || 0;
   const goalAmount = campaign.total_target || 1;
   const percentRaised = Math.min(
@@ -13,16 +15,48 @@ const CampaignCard = ({ campaign }) => {
     100
   );
 
-  const calculateDaysLeft = () => {
-    if (!campaign.end_time) return "N/A";
-    const endDate = new Date(campaign.end_time);
-    const today = new Date();
-    const diffTime = endDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
 
   const backers = campaign.backers_count || 0;
+  const rating = campaign.rating || 0;
+  const reviewCount = campaign.review_count || 0;
+
+  const renderRatingStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star
+          key={`full-${i}`}
+          size={16}
+          fill="#FFD700"
+          color="#FFD700"
+          className="mr-1"
+        />
+      );
+    }
+
+    // Half star
+    if (hasHalfStar) {
+      stars.push(
+        <div key="half" className="relative mr-1">
+          <Star size={16} color="#E5E7EB" />
+          <div className="absolute top-0 left-0 w-1/2 overflow-hidden">
+            <Star size={16} fill="#FFD700" color="#FFD700" />
+          </div>
+        </div>
+      );
+    }
+
+    // Empty stars
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<Star key={`empty-${i}`} size={16} color="#E5E7EB" className="mr-1" />);
+    }
+
+    return stars;
+  };
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
@@ -36,13 +70,21 @@ const CampaignCard = ({ campaign }) => {
         </div>
 
         <CardContent className="p-4">
-          {campaign.category && (
-            <div className="mb-2">
+          <div className="flex justify-between items-center mb-2">
+            {campaign.category && (
               <span className="text-xs font-medium text-primary px-2 py-1 rounded-full bg-primary/10">
                 {campaign.category.title || "No Category"}
               </span>
+            )}
+
+            {/* Rating section */}
+            <div className="flex items-center">
+              <div className="flex mr-1">
+                {renderRatingStars(rating)}
+              </div>
+              <span className="text-xs text-gray-500">({reviewCount})</span>
             </div>
-          )}
+          </div>
 
           <h3 className="font-bold text-lg mb-2 line-clamp-2">{campaign.title}</h3>
 
@@ -69,7 +111,7 @@ const CampaignCard = ({ campaign }) => {
           {backers} backers
         </div>
         <div className="text-gray-500">
-          {calculateDaysLeft()} days left
+          {calculateDaysLeft(campaign)} days left
         </div>
       </CardFooter>
     </Card>

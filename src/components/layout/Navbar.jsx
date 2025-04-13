@@ -44,7 +44,7 @@ const Navbar = () => {
           </Avatar>
           <span className="text-sm font-medium">{user?.username}</span>
         </Link>
-        {user.is_staff ? <Link
+        {user?.is_staff ? <Link
           to="/dashboard"
           className={`text-sm font-medium ${isActive("/discover") ? "text-primary" : "hover:text-primary"}`}
         >

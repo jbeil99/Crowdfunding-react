@@ -10,10 +10,10 @@ import { getFeaturedProjects, getLatestProjects, getTopProjects } from '../../li
 const HomePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const { user } = useSelector((state) => state.auth);
 
   const handleStartCampaign = () => {
-    if (!isAuthenticated) {
+    if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please log in first to start a campaign",

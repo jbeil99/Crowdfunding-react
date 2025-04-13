@@ -19,7 +19,8 @@ import {
     TableRow
 } from '@/components/ui/table';
 
-
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 export default function CommentsTab({ comments }) {
     return (

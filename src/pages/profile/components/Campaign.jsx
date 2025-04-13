@@ -10,6 +10,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { getUserDonations } from "../../../lib/projects";
 import { Link } from "react-router-dom";
+import { getUserProject } from "../../../lib/profile";
 
 function getSinceLabel(createdAt) {
     const createdDate = new Date(createdAt);
@@ -42,22 +43,27 @@ export default function Campaign({ user }) {
     const [error, setError] = useState(null);
     const [nextPageUrl, setNextPageUrl] = useState(null);
 
-
     const fetchCampaigns = async (url) => {
         try {
-            const response = await axios.get(url);
+            const response = await getUserProject(user.id, url);
             const data = response.data;
+
             setCampaignList((prev) => {
-                if (campaignList.length > 0) {
-                    return [...prev, ...data.results]
+                const existingCampaignIds = new Map(prev.map(campaign => [campaign.id, true]));
+
+                const uniqueNewCampaigns = data.results.filter(campaign => !existingCampaignIds.has(campaign.id));
+
+                if (data.results.length > 0) {
+                    return [...prev, ...uniqueNewCampaigns];
                 } else {
-                    return [...data.results]
+                    return [...data.results];
                 }
             });
+
             setNextPageUrl(data.next);
         } catch (err) {
-            console.error("Failed to fetch comments:", err);
-            setError("Something went wrong while fetching comments.");
+            console.error("Failed to fetch campaigns:", err);
+            setError("Something went wrong while fetching campaigns.");
         } finally {
             setLoading(false);
         }
@@ -65,8 +71,7 @@ export default function Campaign({ user }) {
 
     useEffect(() => {
         if (user) {
-            const initialUrl = `http://127.0.0.1:8000/api/projects?user=${user?.id}&page_size=4`;
-            fetchCampaigns(initialUrl);
+            fetchCampaigns();
         }
     }, [user?.id]);
 
@@ -97,7 +102,7 @@ export default function Campaign({ user }) {
                             <p className="text-sm text-gray-600">Started {getSinceLabel(camp.created_at)}</p>
                         </div>
                         <div className="text-right">
-                            <p className="font-medium">${camp.total_donations} / ${camp.total_target}</p>
+                            <p className="font-medium">${camp.total_donations ? camp.total_donations : 0} / ${camp.total_target}</p>
                             <p className="text-sm text-green-600">{camp.is_active ? "Active" : "Canceled"}</p>
                         </div>
                     </div>

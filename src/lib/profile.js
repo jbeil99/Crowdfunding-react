@@ -1,4 +1,3 @@
-import { current } from "@reduxjs/toolkit";
 import axios from "axios";
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -16,7 +15,7 @@ const updateProfile = async (profile) => {
             {
                 headers,
                 transformRequest: [function () {
-                    return profile; // Return FormData directly
+                    return profile; 
                 }],
             }
         );
@@ -52,8 +51,19 @@ const getUsers =async (password) => {
     return response;
 }
 
+const getUserProject =async (user_id, url) => {
+    if(url){
+        const response = await axios.get(url);
+        return response
+    } 
+
+    const response = await axios.get(`${API_URL}/projects?user_id=${user_id}&page_size=4`);
+    return response;
+}
+
 export {
     updateProfile,
     deleteUser,
-    getUsers
+    getUsers,
+    getUserProject
 }

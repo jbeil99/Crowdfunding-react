@@ -1,51 +1,74 @@
-# React + TypeScript + Vite
+# Crowdfunding Frontend Routes Overview
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 Installation
 
-Currently, two official plugins are available:
+Follow these steps to set up the project locally:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# 1. Clone the repository
+git clone https://github.com/jbeil99/Crowdfunding-react
 
-## Expanding the ESLint configuration
+# 2. Navigate into the project directory
+cd Crowdfunding-react
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+# 3. Install the dependencies
+npm install
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+# 4. Start the development server
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Application Routes Structure
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+| Route Path              | Component            | Access Control               |
+| ----------------------- | -------------------- | ---------------------------- |
+| `/`                     | `HomePage`           | Public                       |
+| `/discover`             | `DiscoverPage`       | Public                       |
+| `/campaign/:id`         | `CampaignDetailPage` | Public                       |
+| `/start-campaign`       | `CreateCampaignPage` | Authenticated Users Only     |
+| `/how-it-works`         | `HowItWorksPage`     | Authenticated Users Only     |
+| `/activate/:uid/:token` | `ActivateAccount`    | Public (Token-based)         |
+| `/dashboard`            | `AdminDashboard`     | Admin Users Only             |
+| `/profile`              | `ProfilePage`        | Authenticated Users Only     |
+| `/edit-profile`         | `EditProfileForm`    | Authenticated Users Only     |
+| `/login`                | `LoginPage`          | Non-Authenticated Users Only |
+| `/register`             | `RegisterPage`       | Non-Authenticated Users Only |
+| `/projects/edit/:id`    | `UpdateProjectForm`  | Authenticated Users Only     |
+| `*` (wildcard)          | `NotFoundPage`       | Public                       |
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
-# Crowdfunding-react
+## Key Technologies
+
+### State Management
+
+- **Redux** for global state management
+  - Manages authentication state
+  - Handles project data
+  - Controls user information
+  - Manages form states
+
+### UI Components
+
+- **shadcn/ui** for component library
+  - Provides consistent design system
+  - Includes pre-styled form components
+  - Features accessible UI elements
+  - Supports responsive layouts
+
+### Routing
+
+- **React Router v6** for navigation
+  - Route protection with custom guard components:
+    - `RedirectIfAuthenticated`
+    - `RedirectIfNotAuthenticated`
+    - `AdminGuard`
+  - Nested routes within layout component
+
+### Notifications
+
+- **React Hot Toast** (`<Toaster />`) for user notifications
+  - Success/error messages
+  - Action confirmations
+  - System notifications
+
+> 🖥️ The backend API for this project is available here:  
+> [https://github.com/jbeil99/Crowdfunding-django](https://github.com/jbeil99/Crowdfunding-django)

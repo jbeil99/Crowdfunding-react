@@ -142,23 +142,10 @@ const getCategories =  async () => {
     return response;
 }
 
-export const getCommentsReported = async () => {
-    try {
-        const response = await fetch('http://127.0.0.1:8000/api/comments/reports');
-        if (!response.ok) {
-            throw new Error('Failed to fetch reported comments');
-        }
-        return {
-            status: response.status,
-            data: await response.json()
-        };
-    } catch (error) {
-        console.error('Error:', error);
-        return {
-            status: 500,
-            error: error.message
-        };
-    }
+export const getCommentsReported = async (id) => {
+
+    const response = await axios.get(`${API_URL}/comments/${id ? id : 0}/reports`);
+    return response;
 };
 
 export const getUsers = async () => {
