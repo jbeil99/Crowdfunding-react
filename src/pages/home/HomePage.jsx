@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useSelector } from 'react-redux';
+import { useToast } from '@/hooks/use-toast';
 import CampaignSlider from './components/CampaignSlider';
 import { getFeaturedProjects, getLatestProjects, getTopProjects } from '../../lib/projects';
 
-const categories = [
-  { name: 'Technology', icon: '💻' },
-  { name: 'Arts', icon: '🎨' },
-  { name: 'Education', icon: '📚' },
-  { name: 'Environment', icon: '🌱' },
-  { name: 'Health', icon: '🩺' },
-  { name: 'Community', icon: '🏙️' },
-];
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  const handleStartCampaign = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in first to start a campaign",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    navigate('/start-campaign');
+  };
+
   const [featuredCampaigns, setFeaturedCampaigns] = useState([]);
   const [latestCampaigns, setLatestCampaigns] = useState([]);
   const [topRatedCampaigns, setTopRatedCampaigns] = useState([]);
@@ -58,9 +69,9 @@ const HomePage = () => {
             FundRaiser helps creators and communities raise funds and bring creative projects to life.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/start-campaign">
-              <Button size="lg">Start a Campaign</Button>
-            </Link>
+            <Button size="lg" onClick={handleStartCampaign}>
+              Start a Campaign
+            </Button>
             <Link to="/discover">
               <Button variant="outline" size="lg">
                 Discover Projects

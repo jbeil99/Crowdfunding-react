@@ -14,7 +14,6 @@ const Navbar = () => {
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { user } = useSelector((state) => state.auth);
-
   useEffect(() => {
     if (sessionStorage.getItem('accessToken')) {
       dispatch(getUser())
@@ -45,6 +44,12 @@ const Navbar = () => {
           </Avatar>
           <span className="text-sm font-medium">{user?.username}</span>
         </Link>
+        {user.is_staff ? <Link
+          to="/dashboard"
+          className={`text-sm font-medium ${isActive("/discover") ? "text-primary" : "hover:text-primary"}`}
+        >
+          Dashboard
+        </Link> : ""}
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           Log Out
         </Button>

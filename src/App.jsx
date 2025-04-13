@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import HomePage from "./pages/home/HomePage";
@@ -10,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import { Toaster } from "@/components/Toaster";
-import { RedirectIfAuthenticated, RedirectIfNotAuthenticated } from "./components/auth/AuthGuard";
+import { RedirectIfAuthenticated, RedirectIfNotAuthenticated, AdminGuard } from "./components/auth/AuthGuard";
 import ActivateAccount from "./pages/AccountActivation";
 import ProfilePage from "./pages/profile/Profile";
 import EditProfileForm from "./pages/profile/EditProfile";
 import AdminDashboard from "./pages/admin/Dashboard";
+import { initializeAuth } from "./store/auth";
+import UpdateProjectForm from "./pages/admin/components/UpdateProjectForm";
 
-// Create a 404 page component
 const NotFoundPage = () => {
   return (
     <div className="container mx-auto px-4 py-12 text-center">
@@ -32,6 +34,12 @@ const NotFoundPage = () => {
 };
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(initializeAuth());
+  }, [dispatch]);
+
   return (
     <>
       <Router>
@@ -40,15 +48,31 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/campaign/:id" element={<CampaignDetailPage />} />
-            <Route path="/start-campaign" element={<CreateCampaignPage />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
-            {/* <Route path="/profile" element={<ProfilePage />} /> */}
-            <Route path="/edit-profile" element={<EditProfileForm />} />
-
+            <Route
+              path="/start-campaign"
+              element={
+                <RedirectIfNotAuthenticated>
+                  <CreateCampaignPage />
+                </RedirectIfNotAuthenticated>
+              }
+            />
+            <Route
+              path="/how-it-works"
+              element={
+                <RedirectIfNotAuthenticated>
+                  <HowItWorksPage />
+                </RedirectIfNotAuthenticated>
+              }
+            />
             <Route path="/activate/:uid/:token" element={<ActivateAccount />} />
-
-
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route
+              path="/dashboard"
+              element={
+                <AdminGuard>
+                  <AdminDashboard />
+                </AdminGuard>
+              }
+            />
 
             <Route
               path="/profile"
@@ -66,8 +90,6 @@ function App() {
                 </RedirectIfNotAuthenticated>
               }
             />
-
-
             <Route
               path="/login"
               element={
@@ -82,6 +104,16 @@ function App() {
                 <RedirectIfAuthenticated>
                   <RegisterPage />
                 </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/projects/edit/:id"
+              element={
+                <RedirectIfNotAuthenticated>
+                  <RedirectIfNotAuthenticated>
+                    <UpdateProjectForm />
+                  </RedirectIfNotAuthenticated>
+                </RedirectIfNotAuthenticated>
               }
             />
             <Route path="*" element={<NotFoundPage />} />

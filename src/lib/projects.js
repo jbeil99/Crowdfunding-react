@@ -7,7 +7,7 @@ const addProject = async (project) => {
     const headers = {
         'Authorization': `Bearer ${token}`,
     };
-    const response = await axios.post(`${API_URL}/projects/`, project, { headers });
+    const response = await axios.post(`${API_URL}/projects`, project, { headers });
     return response;
 }
 
@@ -16,24 +16,15 @@ const getProject = async (id) => {
     return response;
 }
 
-const getProjects = async () => {
-    try {
-        const response = await fetch('http://127.0.0.1:8000/api/projects/');
-        if (!response.ok) {
-            throw new Error('Failed to fetch projects');
-        }
-        return {
-            status: response.status,
-            data: await response.json()
-        };
-    } catch (error) {
-        console.error('Error:', error);
-        return {
-            status: 500,
-            error: error.message
-        };
+const getProjects = async (url) => {
+    if (url) {
+        const response = await axios.get(url);
+        return response;
     }
+    const response = await axios.get(`${API_URL}/projects`);
+    return response;
 };
+
 
 const getFeaturedProjects = async () => {
     const response = await axios.get(`${API_URL}/projects?is_featured=true`);
@@ -111,6 +102,14 @@ const addProjectReports= async (details, projectID) => {
     const response = await axios.post(`${API_URL}/projects/${projectID}/reports`, details, { headers });
     return response;
 }
+const getProjectReports= async (projectID) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.get(`${API_URL}/projects/${projectID}/reports`,  { headers });
+    return response;
+}
 const addCommentReports= async (details, commentID) => {
     const token = sessionStorage.getItem('accessToken');
     const headers = {
@@ -120,12 +119,12 @@ const addCommentReports= async (details, commentID) => {
     return response;
 }
 
-const cancelProject = async (projectID) => {
+const cancelProject = async (projectID, is_active) => {
     const token = sessionStorage.getItem('accessToken');
     const headers = {
         'Authorization': `Bearer ${token}`,
     };
-    const response = await axios.patch(`${API_URL}/projects/${projectID}/cancel`, {headers});
+    const response = await axios.patch(`${API_URL}/projects/${projectID}/cancel`,{is_active}, {headers});
     return response;
 }
 
@@ -181,32 +180,35 @@ export const getUsers = async () => {
     }
 };
 
-export const updateCampaignStatus = async (projectId, isActive) => {
-    try {
-        const token = sessionStorage.getItem('accessToken');
-        const response = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/status/`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ is_active: isActive })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update campaign status');
-        }
-        
-        return {
-            status: response.status,
-            data: await response.json()
-        };
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
-    }
+const updateCampaignFeatured = async (projectId, is_featured) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };    
+    const response = await axios.patch(`${API_URL}/projects/${projectId}/featured`,  { is_featured }, {headers});
+    return response;
 };
 
+
+
+const deleteProject = async (projectId) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.delete(`${API_URL}/projects/${projectId}`, {headers});
+    return response;
+}
+
+export const updateProject = async (id, data) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',  
+
+    };
+    return await axios.patch(`${API_URL}/projects/${id}/`, data, {headers});
+};
 export {
     addProject,
     getProject,
@@ -225,5 +227,8 @@ export {
     getUserDonations,
     getDonations,
     getCategories,
-    getProjects
+    getProjects,
+    deleteProject,
+    updateCampaignFeatured,
+    getProjectReports
 }

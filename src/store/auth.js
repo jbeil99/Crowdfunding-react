@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { toast } from '@/hooks/use-toast';
 import {
   login as loginAuth,
@@ -90,12 +90,21 @@ export const getUser = createAsyncThunk(
   }
 )
 
+export const initializeAuth = createAsyncThunk(
+  'auth/initialize',
+  async (_, { dispatch, getState }) => {
+    const state = getState();
+    if (state.auth.tokens.access && !state.auth.user) {
+      await dispatch(getUser());
+    }
+  }
+);
 
 const initialState = {
   user: null,
   tokens: {
     access: sessionStorage.getItem('accessToken'),
-    refresh: sessionStorage.getItem('refreshToken')
+    refresh: sessionStorage.getItem('refreshToken'),
   },
   isLoading: false,
   error: null,
@@ -170,6 +179,16 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.error = null;
       })
+      .addCase(initializeAuth.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(initializeAuth.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(initializeAuth.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message;
+      });
   },
 });
 
@@ -177,4 +196,27 @@ export const { resetError } = authSlice.actions;
 export default authSlice.reducer;
 
 // Selector to check if user is authenticated
-export const selectIsAuthenticated = (state) => Boolean(state.auth.tokens.access);
+export const selectIsAuthenticated = createSelector(
+  [(state) => state.auth.tokens.access],
+  (access) => Boolean(access)
+);
+
+export const selectIsAdmin = createSelector(
+  [(state) => state.auth.user?.is_staff],
+  (isStaff) => Boolean(isStaff)
+);
+
+export const selectAuthStatus = createSelector(
+  [
+    state => state.auth.tokens.access,
+    state => state.auth.user?.is_staff,
+    state => state.auth.user,
+    state => state.auth.isLoading
+  ],
+  (access, isStaff, user, isLoading) => ({
+    isAuthenticated: Boolean(access),
+    isAdmin: Boolean(isStaff),
+    user,
+    isLoading
+  })
+);

@@ -1,24 +1,23 @@
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectIsAuthenticated } from "@/store/auth";
+import { selectAuthStatus, initializeAuth } from "@/store/auth";
 
 export const RedirectIfAuthenticated = ({ children }) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { isAuthenticated } = useSelector(selectAuthStatus);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/profile");
     }
   }, [isAuthenticated, navigate]);
 
   return !isAuthenticated ? children : null;
 };
 
-
 export const RedirectIfNotAuthenticated = ({ children }) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { isAuthenticated } = useSelector(selectAuthStatus);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,4 +27,33 @@ export const RedirectIfNotAuthenticated = ({ children }) => {
   }, [isAuthenticated, navigate]);
 
   return isAuthenticated ? children : null;
+};
+
+export const AdminGuard = ({ children }) => {
+  const { isAuthenticated, isAdmin, isLoading, user } = useSelector(selectAuthStatus);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(initializeAuth());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (user) {
+      if (!isAuthenticated) {
+        navigate("/login");
+        return;
+      }
+      if (!isAdmin) {
+        navigate("/");
+        return;
+      }
+    }
+  }, [isAuthenticated, isAdmin, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return (isAuthenticated && isAdmin) ? children : null;
 };
