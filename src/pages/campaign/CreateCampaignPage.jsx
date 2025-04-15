@@ -199,7 +199,9 @@ const CreateCampaignPage = () => {
       formDataToSend.append('category', formData.category);
 
       // Append tags as JSON string or as separate values based on API requirements
-      formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formData.tags.forEach(tag => {
+        formDataToSend.append('tags', tag);
+      });
 
       // Append thumbnail
       if (formData.thumbnail) {

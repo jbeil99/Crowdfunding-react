@@ -28,7 +28,7 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { getCommentsReported, getProjects, getProject, deleteProject, updateCampaignFeatured, cancelProject, getProjectReports } from '../../lib/projects';
+import { getCommentsReported, getProjects, getProject, deleteProject, updateCampaignFeatured, cancelProject, getProjectReports, updateCampaignAccepted } from '../../lib/projects';
 import { getUsers } from '../../lib/profile';
 import StateOverview from './components/StateOverview';
 import CampaignTab from './components/CampaignTab';
@@ -179,6 +179,20 @@ export default function AdminDashboard() {
             console.error('Failed to update campaign featured status:', error);
         }
     };
+    const handleAcceptUpdate = async (campaignId, isAcceped) => {
+        try {
+            const response = await updateCampaignAccepted(campaignId, isAcceped);
+            if (response.status === 200) {
+                setCampaigns(campaigns.map(campaign =>
+                    campaign.id === campaignId
+                        ? { ...campaign, is_accepted: isAcceped }
+                        : campaign
+                ));
+            }
+        } catch (error) {
+            console.error('Failed to update campaign featured status:', error);
+        }
+    };
 
     const navigateToEditProject = (projectId) => {
         navigate(`/projects/edit/${projectId}`);
@@ -244,6 +258,7 @@ export default function AdminDashboard() {
                         navigateToEditProject={navigateToEditProject}
                         handleLoadMore={handleLoadMore}
                         nextPageUrl={nextPageUrl}
+                        handleAcceptUpdate={handleAcceptUpdate}
                     />
 
                     {/* Users Tab */}

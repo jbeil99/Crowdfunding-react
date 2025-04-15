@@ -13,7 +13,7 @@ export default function ProjectCancelForm({ id }) {
         setIsLoading(true);
 
         try {
-            const response = await cancelProject(id)
+            const response = await cancelProject(id, false)
             console.log(response)
             if (response.status !== 200) {
                 throw new Error('Failed to process Cancel');

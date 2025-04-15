@@ -176,6 +176,15 @@ const updateCampaignFeatured = async (projectId, is_featured) => {
     return response;
 };
 
+const updateCampaignAccepted = async (projectId, is_accepted) => {
+    const token = sessionStorage.getItem('accessToken');
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+    };    
+    const response = await axios.patch(`${API_URL}/projects/${projectId}/accept`,  { is_accepted }, {headers});
+    return response;
+};
+
 
 
 const deleteProject = async (projectId) => {
@@ -183,7 +192,7 @@ const deleteProject = async (projectId) => {
     const headers = {
         'Authorization': `Bearer ${token}`,
     };
-    const response = await axios.delete(`${API_URL}/projects/${projectId}`, {headers});
+    const response = await axios.delete(`${API_URL}/projects/${projectId}/`, {headers});
     return response;
 }
 
@@ -217,5 +226,6 @@ export {
     getProjects,
     deleteProject,
     updateCampaignFeatured,
-    getProjectReports
+    getProjectReports,
+    updateCampaignAccepted
 }

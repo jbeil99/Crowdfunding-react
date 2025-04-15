@@ -19,7 +19,7 @@ import {
 import CampainsTable from "./CampainsTable"
 
 
-export default function CampaignTab({ isLoading, filteredCampaigns, setSelectedCampaign, setShowDeleteAlert, filterStatus, setFilterStatus, handleViewDetails, handleStatusUpdate, handleFeaturedUpdate, navigateToEditProject, handleLoadMore, nextPageUrl }) {
+export default function CampaignTab({ isLoading, filteredCampaigns, setSelectedCampaign, setShowDeleteAlert, filterStatus, setFilterStatus, handleViewDetails, handleStatusUpdate, handleFeaturedUpdate, navigateToEditProject, handleLoadMore, nextPageUrl, handleAcceptUpdate }) {
     return (<TabsContent value="campaigns">
         <Card>
             <CardHeader>
@@ -43,7 +43,7 @@ export default function CampaignTab({ isLoading, filteredCampaigns, setSelectedC
                 </div>
             </CardHeader>
             {/* Campaigns Table */}
-            <CampainsTable isLoading={isLoading} filteredCampaigns={filteredCampaigns} setSelectedCampaign={setSelectedCampaign} setShowDeleteAlert={setShowDeleteAlert} handleViewDetails={handleViewDetails} handleStatusUpdate={handleStatusUpdate} handleFeaturedUpdate={handleFeaturedUpdate} navigateToEditProject={navigateToEditProject} />
+            <CampainsTable isLoading={isLoading} filteredCampaigns={filteredCampaigns} setSelectedCampaign={setSelectedCampaign} setShowDeleteAlert={setShowDeleteAlert} handleViewDetails={handleViewDetails} handleStatusUpdate={handleStatusUpdate} handleFeaturedUpdate={handleFeaturedUpdate} navigateToEditProject={navigateToEditProject} handleAcceptUpdate={handleAcceptUpdate} />
         </Card>
         {nextPageUrl && (
             <div className="text-center mt-4">

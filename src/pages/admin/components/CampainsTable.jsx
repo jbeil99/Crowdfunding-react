@@ -38,7 +38,7 @@ import {
     Star
 } from 'lucide-react';
 
-export default function CampainsTable({ isLoading, filteredCampaigns, setSelectedCampaign, setShowDeleteAlert, setFilterStatus, handleViewDetails, handleStatusUpdate, handleFeaturedUpdate, navigateToEditProject }) {
+export default function CampainsTable({ isLoading, filteredCampaigns, setSelectedCampaign, setShowDeleteAlert, setFilterStatus, handleViewDetails, handleStatusUpdate, handleFeaturedUpdate, navigateToEditProject, handleAcceptUpdate }) {
     return (<CardContent>
         {isLoading ? (
             <div className="flex justify-center py-10">Loading campaigns...</div>
@@ -50,6 +50,7 @@ export default function CampainsTable({ isLoading, filteredCampaigns, setSelecte
                         <TableHead>Category</TableHead>
                         <TableHead>Target</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Accepted</TableHead>
                         <TableHead>Featured</TableHead>
                         <TableHead>Rating</TableHead>
                         <TableHead>End Date</TableHead>
@@ -65,6 +66,11 @@ export default function CampainsTable({ isLoading, filteredCampaigns, setSelecte
                             <TableCell>
                                 <Badge className={campaign.is_active ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
                                     {campaign.is_active ? "Active" : "Inactive"}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>
+                                <Badge className={campaign.is_accepted ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                                    {campaign.is_accepted ? "Accepted" : "Pendding"}
                                 </Badge>
                             </TableCell>
                             <TableCell>
@@ -130,6 +136,24 @@ export default function CampainsTable({ isLoading, filteredCampaigns, setSelecte
                                             >
                                                 <Star className="mr-2 h-4 w-4" />
                                                 Feature Campaign
+                                            </DropdownMenuItem>
+                                        )}
+
+                                        {campaign.is_accepted ? (
+                                            <DropdownMenuItem
+                                                onClick={() => handleAcceptUpdate(campaign.id, false)}
+                                                className="text-gray-600"
+                                            >
+                                                <ThumbsDown className="mr-2 h-4 w-4" />
+                                                Refuse Campaign
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <DropdownMenuItem
+                                                onClick={() => handleAcceptUpdate(campaign.id, true)}
+                                                className="text-blue-600"
+                                            >
+                                                <Star className="mr-2 h-4 w-4" />
+                                                Accept Campaign
                                             </DropdownMenuItem>
                                         )}
 
